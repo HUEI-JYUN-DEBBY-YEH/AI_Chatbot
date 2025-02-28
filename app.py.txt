@@ -1,0 +1,25 @@
+from flask import Flask, render_template
+app = Flask (__name__)
+list1={"David Chou": "A123456789", "Vivian Kuo": "B223348910", "Angela Tsai": "C221159139"} 
+
+
+@app.route('/index')
+def index():
+    return '您好，我是AI智能客服機器人！'
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    user name = request.values['username']
+    password = request.values['password']
+    if username.password=list1(key.value):
+        return '歡迎使用此服務，請問您有什麼問題？'
+    else:
+        reture '帳號或密碼錯誤，無法使用本服務！'
+
+@app.route('/mainpage')
+def mainpage():
+    now=datetime.now()
+    return render_template('chatbot.html', **locals())
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", debug=False)

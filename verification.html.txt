@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset='utf-8'>
+    <title> AI Chatbot <title>
+</head>
+<body>
+<h1> AI智能客服機器人 </h1>
+    <form method='post' >
+        <p>帳號: <input type='text' name='username' /></p>
+        <p>密碼: <input type='text' name='password' /></p>
+        <p><button type='submit'> 確定 </button></p>
+    <h4> datetime.now() </h4>
+<body>
+</html>
