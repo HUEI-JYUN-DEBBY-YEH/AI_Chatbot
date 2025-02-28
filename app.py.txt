@@ -1,5 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, request, render_template
+from datetime import datetime
+
 app = Flask (__name__)
+
 list1={"David Chou": "A123456789", "Vivian Kuo": "B223348910", "Angela Tsai": "C221159139"} 
 
 
@@ -9,17 +12,22 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    user name = request.values['username']
-    password = request.values['password']
-    if username.password=list1(key.value):
+    username = request.form.get['username']
+    password = request.form.get['password']
+    
+    if username in list1 and list1[username]==password:
         return '歡迎使用此服務，請問您有什麼問題？'
     else:
-        reture '帳號或密碼錯誤，無法使用本服務！'
+        return '帳號或密碼錯誤，無法使用本服務！'
+
+@app.route('/verification')
+def verification():
+    return render_template('verification.html')
 
 @app.route('/mainpage')
 def mainpage():
     now=datetime.now()
-    return render_template('chatbot.html', **locals())
+    return render_template('chatbot_mainpage.html', now=now)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=False)

@@ -1,20 +1,19 @@
 <!DOCTYPE html>
-<html lang="zh-TW", font-family: "sans-serif">
+<html lang="zh-TW", style="font-family: sans-serif;">
 
 <head>
     <meta charset='utf-8'>
-    <title> AI Chatbot <title>
+    <title> AI Chatbot </title>
 </head>
+
 <body>
 <h1> AI智能客服機器人 </h1>
-    <h2> 您好，請問您有什麼問題？</h2>
-    <form method='post' >
-        <p>對話框: <textarea name="message"; 
-        width:600px:
-        height:400px> 輸入內容 </textarea></p>
-        <p><button type='submit';
-	width:600px;
-        height:50px> 確定 </button></p>
-    <h4> datetime.now() </h4>
+<h2> 您好，請問您有什麼問題？</h2>
+<form method='post' >
+    <p>對話框: <textarea name="message" style="width:600px; height:400px"> 輸入內容 </textarea></p>
+    <p><button type='submit' style="width:600px; height:50px"> 確定 </button></p>
+</form>
+<h4> {{now}} </h4>
 <body>
+
 </html>
