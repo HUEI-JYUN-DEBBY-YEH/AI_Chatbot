@@ -7,13 +7,16 @@
 </head>
 
 <body>
-<h1> AI智能客服機器人 </h1>
-<h2> 您好，請問您有什麼問題？</h2>
-<form method='post' >
-    <p>對話框: <textarea name="message" style="width:600px; height:400px"> 輸入內容 </textarea></p>
-    <p><button type='submit' style="width:600px; height:50px"> 確定 </button></p>
-</form>
-<h4> {{now}} </h4>
+    <h1> AI智能客服機器人 </h1>
+    <h2> 歡迎，{{username}}！請問您有什麼問題？</h2>
+
+    <form method='post' >
+        <p>對話框: <textarea name="message" style="width:600px; height:400px"> 輸入內容 </textarea></p>
+        <p><button type='submit' style="width:600px; height:50px"> 確定 </button></p>
+    </form>
+
+    <p><a href="/logout">登出</a></p>
+    <h4> {{now}} </h4>
 <body>
 
 </html>

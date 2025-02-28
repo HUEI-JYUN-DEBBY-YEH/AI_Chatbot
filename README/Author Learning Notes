@@ -1,0 +1,10 @@
+Brainstorming and Learning Notes by Author
+
+This note listed down all the design process and author's chain of thought. All solutions and suggestions were given by ChatGPT.
+
+2025.2.28 (Friday)
+- Design Q1: if I put all verification information in app.py, would it successfully trigger ID verifying process before using AI Chatbot services?
+- ChatGPT A1: 
+    (1) use "session" for verification function
+    (2) redirect to mainpage after successfully verified
+    (3) logout after using the service
