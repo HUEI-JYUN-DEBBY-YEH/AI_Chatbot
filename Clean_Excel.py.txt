@@ -1,0 +1,14 @@
+import pandas as pd
+
+originalexcel dir="YOUR EXCEL FOLDER"
+cleanexcel dir="OUTPUT EXCEL FOLDER"
+
+for pd.read_excel in originalexcel:
+df1=pd.read_excel(),
+	if null1=df1.isnull().any():
+		return df1.dropna()
+	elif df1.drop_duplicates():
+		print("資料已刪除重複值")
+	else:
+		print("資料已確認無空值")
+

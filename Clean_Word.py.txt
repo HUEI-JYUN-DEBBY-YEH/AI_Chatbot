@@ -1,0 +1,23 @@
+from docx import Document
+from docx.shared import Inches
+
+originaldoc dir="YOUR WORD FOLDER"
+cleaneddoc dir="OUTPUT WORD FOLDER"
+
+document = Document()
+
+document.add_heading('Document Title', 0)
+
+document.add_heading('Heading, level 1', level=1)
+
+document.add_paragraph('Intense quote', style='Intense Quote')
+
+document.add_paragraph('first item in unordered list', style='List Bullet')
+
+document.add_paragraph('first item in ordered list', style='List Number')
+
+table = document.add_table()
+
+document.add_page_break()
+
+document.save('demo.docx')
