@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-TW" style="font-family: sans-serif">
+
+<head>
+    <meta charset='utf-8'>
+    <title>AI Chatbot 身分驗證</title>
+</head>
+
+<body>
+    <h1> AI智能客服機器人 </h1>
+    <h2> 請輸入您的帳號與密碼 </h2>
+
+    {% if error %}
+        <p style="color: red;">{{error}}</p>
+    {% endif %}
+
+    <form method='post', action='/verification' >
+        <p>帳號: <input type='text' name='username' required/></p>
+        <p>密碼: <input type='password' name='password' required/></p>
+        <p><button type='submit'> 確定 </button></p>
+    </form>
+    <h4> {{now}} </h4>
+</body>
+
+</html>

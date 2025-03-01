@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-TW", style="font-family: sans-serif;">
+
+<head>
+    <meta charset='utf-8'>
+    <title> AI Chatbot </title>
+    <style>
+        /* 聊天框的基本樣式 */
+        #chat_container {
+            width: 50%;
+            height: 400px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;  /* 允許滾動 */
+            background-color: #f9f9f9;
+        }
+        .user-message {
+            text-align: right;
+            color: blue;
+            margin: 5px;
+        }
+        .ai-message {
+            text-align: left;
+            color: green;
+            margin: 5px;
+        }
+        #user_input {
+            width: 70%;
+            padding: 5px;
+        }
+        #send_button {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1> AI智能客服機器人 </h1>
+    <h2> 歡迎！請問您有什麼問題？</h2>
+
+    <!-- 聊天框 -->
+    <div id="chat_container"></div>
+
+    <!-- 輸入框 + 按鈕 -->
+    <input type="text" id="user_input" placeholder="請輸入訊息...">
+    <button id="send_button" onclick="sendMessage()">發送</button>
+
+    <p><a href="/logout">登出</a></p>
+    <h4>{{ now }}</h4>
+
+
+   <script>
+        function sendMessage() {
+            let userInput = document.getElementById("user_input").value.trim();  // 取得輸入值
+
+            if (userInput === "") {
+                alert("請輸入訊息！");
+                return;
+            }
+
+            // 顯示使用者訊息
+            let chatContainer = document.getElementById("chat_container");
+            chatContainer.innerHTML += `<p class="user-message"><strong>你:</strong> ${userInput}</p>`;
+
+            // 發送 API 請求
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.response) {
+                    chatContainer.innerHTML += `<p class="ai-message"><strong>AI:</strong> ${data.response}</p>`;
+                } else if (data.error) {
+                    chatContainer.innerHTML += `<p class="ai-message" style="color:red;"><strong>錯誤:</strong> ${data.error}</p>`;
+                } else {
+                    chatContainer.innerHTML += `<p class="ai-message" style="color:red;"><strong>錯誤:</strong> AI 無回應</p>`;
+                }
+                chatContainer.scrollTop = chatContainer.scrollHeight;  // 自動滾動到底部
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                chatContainer.innerHTML += `<p class="ai-message" style="color:red;"><strong>錯誤:</strong> 無法連接到伺服器</p>`;
+            });
+
+            // 清空輸入框
+            document.getElementById("user_input").value = "";
+        }
+    </script>
+</body>
+</html>

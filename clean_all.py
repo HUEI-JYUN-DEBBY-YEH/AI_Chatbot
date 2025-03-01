@@ -4,8 +4,8 @@ import fitz  # pymupdf
 from docx import Document
 
 #設定原始資料夾與輸出資料夾
-input_folder="YOUR_INPUT_FOLDER" #存放原始的PDF、Word、Excel檔案 
-output_folder="YOUR_OUTPUT_FOLDER"  #存放清理後的檔案
+input_folder="YOUR_ORIGINAL_RAG_FILE" #存放原始的PDF_Word_Excel檔案 
+output_folder="CLEANED_RAG_FILE_INTO_TXT"  #存放清理後的檔案
 
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)  #如果輸出資料夾不存在，就建立它
@@ -32,7 +32,7 @@ def process_word(file_path,output_path):
 
     #儲存清理後的Word內容為txt檔案
     output_file=os.path.join(output_path, os.path.basename(file_path).replace(".docx", ".txt"))
-    with open(output_file, "w", encoding='utf-8") as f:
+    with open(output_file, "w", encoding='utf-8') as f:
         f.write(text)
     print(f"清理後的Word內容已儲存: {output_file}")
 
