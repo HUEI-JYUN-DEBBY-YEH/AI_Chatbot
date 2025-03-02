@@ -8,3 +8,40 @@ This note listed down all the design process and author's chain of thought. All 
     (1) use "session" for verification function
     (2) redirect to mainpage after successfully verified
     (3) logout after using the service
+
+2025.3.1(Saturday)
+- Key change in code:
+    (1) all inputs and responses must be converted into vector information and retrieved from txt
+    (2) limited token quota for LLM search
+    (3) fetch api/chat method 'POST' versus 'GET': determines how secured the service is
+
+2025.3.2(Sunday)
+- Heroku deployment failed:
+    (1) Tips for using Heroku
+      (1)-1 Slug size: Maximum 500MB for all uploaded files, including dependencies and libraries. Ensure taht the slug size remains below 500MB to avoid deployment failures  
+      (1)-2 files must include: 
+         -- Procfile (e.g. web:gunicorn app:app):
+            - Ensure the filename is "Procfile" with no file extension
+            - The format is: 'web: <command>' (e.g., 'web:gunicorn app:app)
+         -- .gitignore (must exclude large and unnecessary files)
+            - venv/
+            - __pycache__/
+            - .env
+            - *.pyc
+            - *.pkl
+            - *.sqlite3
+         -- Requirements.txt: Be careful with large dependencies (e.g., SentenceTransformers, faiss-cpu)
+            - Instead of installing all sentence-transformers models, use:
+               `from sentence_transformers import SentenceTransformer`
+               `model = SentenceTransformer('all-MiniLM-L6-v2')`
+         -- API key setting: Run the following command in the terminal:
+              heroku config:set OPENAI_API_KEY="YOUR_API_KEY"
+            - Then use `os.getenv("OPENAI_API_KEY")` in Python
+         -- Do not use "runtime.txt", replace with ".python-version"
+    (2) Reinitializing Heroku apps:
+      (2)-1 Must del all git history
+      (2)-2 Modify all files, then run:
+           git add .
+           git commit -m "..." "
+      (2)-3 Push to Heroku:
+           git push heroku main # (or master)

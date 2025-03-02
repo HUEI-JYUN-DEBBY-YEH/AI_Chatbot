@@ -4,7 +4,7 @@ This is a project constructed under non-Microsoft environment and would relative
 
 Key Concepts:
 - RAG: code for converting original files into LLM-friendly format
-- Prompt Engineering: commonly used prompt for different purposes
+- Prompt Engineering: commonly used prompt
 - Flask API: light server construction code
 - Frontend chat-UI design with user verification system: sample basic html code for chat interface
 - Open source deployment with Heroku 
