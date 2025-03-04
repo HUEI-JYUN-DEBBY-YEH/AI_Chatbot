@@ -177,4 +177,4 @@ with app.app_context():
 # 確保 Flask 監聽 Render 指定的 PORT
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  # 預設 10000，Render 會自動設定 PORT 環境變數
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
