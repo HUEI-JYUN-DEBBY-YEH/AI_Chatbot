@@ -71,19 +71,26 @@ model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", cache_fold
 print("模型下載完成，準備運行應用...")
 
 
+@app.route("/health")
+def health():
+    """提供 Render 監測服務運行狀態"""
+    return "OK", 200
+
 @app.route("/")
 def home():
+    """首頁：Render 需要時回應 AI Chatbot 狀態，否則導向驗證"""
     if os.environ.get("RENDER_ENV") == "production":
         return "AI Chatbot is running!"
     return redirect(url_for('verification'))  # 預設導向驗證頁面
 
 @app.route("/verification", methods=["GET", "POST"])
 def verification():
+    """登入驗證邏輯"""
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
 
-        if users.get(username) == password:  # 用 `get()` 確保 key 存在
+        if users.get(username) == password:  # 用 `get()` 避免 KeyError
             session["username"] = username  # 設定 session
             return redirect(url_for("mainpage"))
         else:
@@ -91,12 +98,12 @@ def verification():
 
     return render_template("verification.html")  # 預設顯示登入畫面
 
-
-@app.route('/mainpage')
+@app.route("/mainpage")
 def mainpage():
-    if 'username' not in session:
-        return redirect(url_for('verification'))  # 如果未登入，導回驗證頁面
-    return render_template('chatbot_mainpage.html')  # ✅ 進入聊天頁面
+    """主頁面：只有通過驗證的用戶才能進入"""
+    if "username" not in session:
+        return redirect(url_for("verification"))  # 未登入則返回驗證頁面
+    return render_template("chatbot_mainpage.html")  # 進入聊天頁面
 
 
 @app.route('/api/chat', methods=['POST'])
