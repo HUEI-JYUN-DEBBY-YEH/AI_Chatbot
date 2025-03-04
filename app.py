@@ -71,23 +71,25 @@ model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", cache_fold
 print("模型下載完成，準備運行應用...")
 
 
-@app.route('/')
+@app.route("/")
 def home():
-    return redirect(url_for('verification')) #預設導向驗證頁面
+    if os.environ.get("RENDER_ENV") == "production":
+        return "AI Chatbot is running!"
+    return redirect(url_for('verification'))  # 預設導向驗證頁面
 
-@app.route('/verification', methods=['GET', 'POST'])
+@app.route("/verification", methods=["GET", "POST"])
 def verification():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-    
-        if username in users and users[username]==password:
-            session['username']=username  #設定session，表示登入成功
-            return redirect(url_for('mainpage'))
-        else:
-            return render_template('verification.html', error="帳號或密碼錯誤，請重新輸入！")
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
 
-    return render_template('verification.html')
+        if users.get(username) == password:  # 用 `get()` 確保 key 存在
+            session["username"] = username  # 設定 session
+            return redirect(url_for("mainpage"))
+        else:
+            return render_template("verification.html", error="帳號或密碼錯誤，請重新輸入！")
+
+    return render_template("verification.html")  # 預設顯示登入畫面
 
 
 @app.route('/mainpage')
@@ -150,6 +152,10 @@ def logout():
     session.pop('username', None)  #清除session
     return redirect(url_for('verification'))  #登出後導回驗證頁面
 
+@app.route("/api/history", methods=["GET"])
+def history():
+    return {"message": "This is the history API!"}
+
 class ChatHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False)
@@ -161,5 +167,7 @@ class ChatHistory(db.Model):
 with app.app_context():
     db.create_all()
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=False)
+# 確保 Flask 監聽 Render 指定的 PORT
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))  # 預設 10000，Render 會自動設定 PORT 環境變數
+    app.run(host="0.0.0.0", port=port)
