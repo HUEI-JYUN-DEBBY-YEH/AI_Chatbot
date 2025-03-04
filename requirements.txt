@@ -2,3 +2,4 @@ flask
 flask-sqlalchemy
 psycopg2
 gunicorn
+faiss-cpu
