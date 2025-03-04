@@ -31,10 +31,8 @@ load_dotenv()
 
 # ✅ 讀取 OpenAI API Key
 openai.api_key = os.getenv("OPENAI_API_KEY")
-print(f"API Key: {openai.api_key}")  # 這應該印出你的 API Key，如果是 None 就代表沒讀取到
-
 if not openai.api_key:
-    raise ValueError("❌ 缺少 OPENAI_API_KEY，請確認 .env 檔案是否正確！")
+    raise ValueError("❌ 缺少 OPENAI_API_KEY，請確認Render環境變數設定！")
 
 
 #初始化FAISS向量檢索
