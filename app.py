@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify
+from flask_sqlalchemy import SQLAlchemy
 import os
 import faiss
 import numpy as np
@@ -8,7 +9,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 app = Flask (__name__) 
-app.secret_key='YOUR_SESSION_KEY' #設定session安全密鑰
+app.secret_key='asdfghjkl0987654321' #設定session安全密鑰
 
 #模擬身分驗證資料庫
 users={
@@ -17,18 +18,27 @@ users={
     "Angela Tsai": "C221159139"
     }
 
+# 設定 Render 提供的 DATABASE_URL
+DATABASE_URL = os.getenv("postgresql://chatbot_aihr_user:5qlSd9DnQ4Qsg1VlkLYUJdYzFi8CkRAH@dpg-cv3dcn3tq21c73bjp2r0-a/chatbot_aihr", "sqlite:///test.db")  # 預設本地 SQLite 以防止環境變數遺失
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+
+
 # ✅ 載入 .env 檔案
 load_dotenv()
 
 # ✅ 讀取 OpenAI API Key
 openai.api_key = os.getenv("OPENAI_API_KEY")
+print(f"API Key: {openai.api_key}")  # 這應該印出你的 API Key，如果是 None 就代表沒讀取到
 
 if not openai.api_key:
     raise ValueError("❌ 缺少 OPENAI_API_KEY，請確認 .env 檔案是否正確！")
 
 
 #初始化FAISS向量檢索
-faiss_db_path = "YOUR_FAISS_FILE_PATH"
+faiss_db_path = "D:/Testing/Output_Vector/vector_database.faiss"
 if os.path.exists(faiss_db_path):
     index = faiss.read_index(faiss_db_path)
 else:
@@ -39,7 +49,7 @@ index=faiss.read_index(faiss_db_path)
 
 
 documents = []
-vector_data_folder = "YOUR_INPUT_FOLDER_FOR_ORIGINAL_TXT"
+vector_data_folder = "D:/Testing/Output_Clean"
 
 if os.path.exists(vector_data_folder):  # 確保資料夾存在
     for filename in sorted(os.listdir(vector_data_folder)):  
@@ -54,7 +64,8 @@ if not documents:
 
 #初始化LLM(OpenAI GPT API)
 openai.api_key=os.getenv("OPENAI_API_KEY")   #從環境變數讀取API Key
-model=SentenceTransformer("all-MiniLM-L6-V2")
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", cache_folder="./model_cache")
+print("模型下載完成，準備運行應用...")
 
 
 @app.route('/')
@@ -118,7 +129,7 @@ def chat():
         client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}]
         )
 
@@ -135,6 +146,17 @@ def chat():
 def logout():
     session.pop('username', None)  #清除session
     return redirect(url_for('verification'))  #登出後導回驗證頁面
+
+class ChatHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), nullable=False)
+    user_message = db.Column(db.Text, nullable=False)
+    bot_response = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+# 確保資料表建立
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=False)
