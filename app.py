@@ -34,6 +34,21 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 if not openai.api_key:
     raise ValueError("❌ 缺少 OPENAI_API_KEY，請確認Render環境變數設定！")
 
+db_path = "Output_Vector/vector_database.faiss"
+
+# 確保資料夾存在
+os.makedirs("Output_Vector", exist_ok=True)
+
+# 如果檔案不存在，自動建立一個 FAISS 資料庫
+if not os.path.exists(db_path):
+    print("⚠️ 找不到 FAISS 資料庫，正在建立新的 FAISS 索引！")
+    index = faiss.IndexFlatL2(512)  # 假設向量維度為 512
+    faiss.write_index(index, db_path)
+    print("✅ FAISS 資料庫已建立！")
+
+# 讀取 FAISS 索引
+index = faiss.read_index(db_path)
+print("✅ FAISS 資料庫載入成功！")
 
 #初始化FAISS向量檢索
 faiss_db_path = "C:/Users/USER/OneDrive/Github/1. AI ChatBot/Output_Vector/vector_database.faiss"
