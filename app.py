@@ -36,7 +36,7 @@ if not openai.api_key:
 
 
 #初始化FAISS向量檢索
-faiss_db_path = "D:/Testing/Output_Vector/vector_database.faiss"
+faiss_db_path = "C:/Users/USER/OneDrive/Github/1. AI ChatBot/Output_Vector/vector_database.faiss"
 if os.path.exists(faiss_db_path):
     index = faiss.read_index(faiss_db_path)
 else:
@@ -47,7 +47,7 @@ index=faiss.read_index(faiss_db_path)
 
 
 documents = []
-vector_data_folder = "D:/Testing/Output_Clean"
+vector_data_folder = "C:/Users/USER/OneDrive/Github/1. AI ChatBot/Output_Clean"
 
 if os.path.exists(vector_data_folder):  # 確保資料夾存在
     for filename in sorted(os.listdir(vector_data_folder)):  
