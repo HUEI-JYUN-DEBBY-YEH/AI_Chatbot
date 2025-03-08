@@ -76,32 +76,24 @@ def health():
     """提供 Render 監測服務運行狀態"""
     return "OK", 200
 
-@app.route('/test_faiss', methods=['GET'])
+@app.route("/test_faiss", methods=["GET"])
 def test_faiss():
     try:
-        FAISS_DB_PATH = os.getenv("FAISS_DB_PATH", "/opt/render/project/src/Output_Vector/vector_database.faiss")
-        
-        if not os.path.exists(FAISS_DB_PATH):
-            return jsonify({"error": "❌ 找不到 FAISS 資料庫，請確認檔案是否存在！"}), 500
+        test_query = "測試"
+        user_embedding = embed_text(test_query)  # 假設有一個 embedding 方法
+        distances, indices = index.search(user_embedding, k=3)
 
-        import faiss
-        import numpy as np
+        retrieved_texts = []
+        for idx in indices[0]:
+            if 0 <= idx < len(documents):
+                retrieved_texts.append(documents[idx])
+            else:
+                retrieved_texts.append(f"未知內容（索引 {idx}）")
 
-        index = faiss.read_index(FAISS_DB_PATH)
-        D = index.d  # 取得 FAISS index 的維度
-        user_embedding = np.random.rand(1, D).astype("float32")
-
-        k = 3
-        distances, indices = index.search(user_embedding, k)
-
-        return jsonify({
-            "message": "✅ FAISS 測試成功！",
-            "indices": indices.tolist(),
-            "distances": distances.tolist()
-        })
+        return jsonify({"retrieved_texts": retrieved_texts})
 
     except Exception as e:
-        return jsonify({"error": f"❌ FAISS 測試失敗: {str(e)}"}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/")
@@ -150,7 +142,7 @@ def chat():
         user_embedding = np.array(user_embedding, dtype=np.float32)
 
         # 在 FAISS 中尋找最相關的文本
-        k = 3
+        k = 1
         distances, indices = index.search(user_embedding, k)
 
         retrieved_texts = []
@@ -163,7 +155,7 @@ def chat():
 
         # ✅ 這裡加上限制最多取3 條資料，並限制總長度
         MAX_TOKENS = 1000 
-        merged_texts = " ".join(retrieved_texts[:3])[:500]  # 取最多 2個文檔 & 限制 500 tokens
+        merged_texts = " ".join(retrieved_texts[:1])[:500]  # 取最多 2個文檔 & 限制 500 tokens
         merged_texts = merged_texts[:merged_texts.rfind(" ")]  # 確保不截斷單詞
 
         #設計Prompt，確保AI聚焦在FAISS檢索道的資料
