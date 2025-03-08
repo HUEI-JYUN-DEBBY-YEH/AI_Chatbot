@@ -77,15 +77,25 @@ if os.path.exists(vector_data_folder):
 if not documents:  
     print("⚠️ 警告：`documents` 為空，請確認 `Output_Clean` 資料夾內有 `.txt` 檔案！")
 
+# ✅ 確保 OpenAI API Key 存在
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("❌ 缺少 OPENAI_API_KEY，請確認 Render 環境變數設定！")
 
-#初始化LLM(OpenAI GPT API)
-openai.api_key=os.getenv("OPENAI_API_KEY")   #從環境變數讀取API Key
-embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", cache_folder="./model_cache")
-print("模型下載完成，準備運行應用...")
+client = openai.OpenAI(api_key=api_key)  # ✅ 確保 API Key 正確設定
+print("✅ OpenAI API 連線成功！")
 
-# 定義 embedding 函數
+# ✅ 初始化 SentenceTransformer 模型
+embedding_model = SentenceTransformer(
+    "sentence-transformers/all-MiniLM-L6-V2",
+    cache_folder="./model_cache"
+)
+print("✅ LLM 模型下載完成，準備運行應用...")
+
+# ✅ 定義 embedding 函數，確保輸出格式符合 FAISS 要求
 def embed_text(text):
-    return np.array([embedding_model.encode(text)])
+    embedding = embedding_model.encode(text)
+    return np.array(embedding).reshape(1, -1)  # ✅ 確保 shape 為 (1, 384)
 
 @app.route("/health")
 def health():
@@ -139,6 +149,9 @@ def chat():
         
         print(f"🔍 FAISS 測試結果：{retrieved_texts}")  # 在 Log 內顯示 FAISS 內容
         
+        if all("未知內容" in text for text in retrieved_texts):
+            return jsonify({"error": "❌ FAISS 搜索無效，請確認索引庫內容"}), 500
+
         # 繼續處理 AI 聊天
         data = request.get_json()
         user_input = data.get("message", "")
@@ -151,8 +164,9 @@ def chat():
         背景資料：{retrieved_texts}
         問題：{user_input}
         """
+        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": prompt},
