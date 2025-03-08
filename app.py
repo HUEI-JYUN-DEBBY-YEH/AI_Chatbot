@@ -122,7 +122,7 @@ def chat():
         user_embedding = np.array(user_embedding, dtype=np.float32)
 
         # 在 FAISS 中尋找最相關的文本
-        k = 5
+        k = 3
         distances, indices = index.search(user_embedding, k)
 
         retrieved_texts = []
@@ -135,13 +135,14 @@ def chat():
 
         # ✅ 這裡加上限制最多取3 條資料，並限制總長度
         MAX_TOKENS = 1000 
-        merged_texts = " ".join(retrieved_texts[:5])[:500]  # 取最多 2個文檔 & 限制 500 tokens
+        merged_texts = " ".join(retrieved_texts[:3])[:500]  # 取最多 2個文檔 & 限制 500 tokens
         merged_texts = merged_texts[:merged_texts.rfind(" ")]  # 確保不截斷單詞
 
         #設計Prompt，確保AI聚焦在FAISS檢索道的資料
         prompt = f"""
-        你是一個 AI 助手，**只能根據提供的FAISS背景資料回答問題**，不可自行推測或編造答案。  
-        如果背景資料不足，請回答：「無法找到相關資料，請提供更多資訊。」  
+        你是一個專業 AI 助手，請根據提供的FAISS背景資料回答問題。  
+        如果背景資料不足，你可以根據你的知識做簡要回答。  
+        但請保持回應清晰、具體，並確保邏輯正確。 
 
         🔍 **背景資料**
         {retrieved_texts}
@@ -156,8 +157,8 @@ def chat():
             response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "你是一個AI助手，請基於 FAISS 提供的背景資訊回答問題。"},
-                    {"role": "user", "content": prompt},
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": "請提出問題"},
                 ],
                 temperature=0,  # 📌 降低隨機性，讓回答更準確
                 max_tokens=300,  # 避免回應過長
