@@ -76,26 +76,6 @@ def health():
     """提供 Render 監測服務運行狀態"""
     return "OK", 200
 
-@app.route("/test_faiss", methods=["GET"])
-def test_faiss():
-    try:
-        test_query = "測試"
-        user_embedding = embed_text(test_query)  # 假設有一個 embedding 方法
-        distances, indices = index.search(user_embedding, k=3)
-
-        retrieved_texts = []
-        for idx in indices[0]:
-            if 0 <= idx < len(documents):
-                retrieved_texts.append(documents[idx])
-            else:
-                retrieved_texts.append(f"未知內容（索引 {idx}）")
-
-        return jsonify({"retrieved_texts": retrieved_texts})
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 @app.route("/")
 def home():
     """首頁：Render 需要時回應 AI Chatbot 狀態，否則導向驗證"""
@@ -126,75 +106,53 @@ def mainpage():
     return render_template("chatbot_mainpage.html")  # 進入聊天頁面
 
 
-@app.route('/api/chat', methods=['POST'])
+@app.route("/api/chat", methods=["POST"])
 def chat():
     try:
-        if 'username' not in session:
-            return jsonify({"error": "未登入，請先驗證身分"}), 401
-
-        user_input = request.json.get("message", "")
-
-        if not user_input:
-            return jsonify({"error": "請輸入訊息"}), 400
-
-        # 轉換使用者輸入為向量
-        user_embedding = model.encode([user_input])
-        user_embedding = np.array(user_embedding, dtype=np.float32)
-
-        # 在 FAISS 中尋找最相關的文本
-        k = 1
-        distances, indices = index.search(user_embedding, k)
-
+        # 先測試 FAISS 是否可用
+        test_query = "測試"
+        user_embedding = embed_text(test_query)
+        distances, indices = index.search(user_embedding, k=1)
+        
         retrieved_texts = []
-        for idx in indices[0]:  
-            if 0 <= idx < len(documents):  
+        for idx in indices[0]:
+            if 0 <= idx < len(documents):
                 retrieved_texts.append(documents[idx])
             else:
                 retrieved_texts.append(f"未知內容 (索引 {idx})")
-        print(f"🔍 FAISS 提供的背景資料:\n{retrieved_texts}")
+        
+        print(f"🔍 FAISS 測試結果：{retrieved_texts}")  # 在 Log 內顯示 FAISS 內容
+        
+        # 繼續處理 AI 聊天
+        data = request.get_json()
+        user_input = data.get("message", "")
 
-        # ✅ 這裡加上限制最多取3 條資料，並限制總長度
-        MAX_TOKENS = 1000 
-        merged_texts = " ".join(retrieved_texts[:1])[:500]  # 取最多 2個文檔 & 限制 500 tokens
-        merged_texts = merged_texts[:merged_texts.rfind(" ")]  # 確保不截斷單詞
+        if not user_input:
+            return jsonify({"response": "請輸入有效的問題"}), 400
 
-        #設計Prompt，確保AI聚焦在FAISS檢索道的資料
         prompt = f"""
-        你是一個專業 AI 助手，請根據提供的FAISS背景資料回答問題。  
-        如果背景資料不足，你可以根據你的知識做簡要回答。  
-        但請保持回應清晰、具體，並確保邏輯正確。 
-
-        🔍 **背景資料**
-        {retrieved_texts}
-
-        ❓ **問題**
-        {user_input}
+        你是一個 AI 助手，請根據 FAISS 提供的背景資訊回答問題。
+        背景資料：{retrieved_texts}
+        問題：{user_input}
         """
 
-        # ✅ 使用OpenAI API 進行回應
-        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        try: 
-            response = client.chat.completions.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": prompt},
-                    {"role": "user", "content": "請提出問題"},
-                ],
-                temperature=0,  # 📌 降低隨機性，讓回答更準確
-                max_tokens=300,  # 避免回應過長
-                stop=["\n\n"]
-            )
-            answer = response.choices[0].message.content  # ✅ 正確取得回答內容
-            print(f"🤖 AI 回應: {answer}")
-        except Exception as e:
-            print(f"❌ OpenAI API Error: {e}")
-            answer = "對不起，我無法處理您的請求。"
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": "請提供回答"},
+            ],
+            temperature=0,
+            max_tokens=300
+        )
         
+        answer = response.choices[0].message.content
         return jsonify({"response": answer})
 
     except Exception as e:
-        print(f"❌ 伺服器錯誤: {str(e)}")  # ✅ 讓 Flask 終端機顯示錯誤訊息
-        return jsonify({"error": "伺服器發生錯誤，請稍後再試"}), 500
+        print(f"❌ FAISS 測試失敗: {e}")
+        return jsonify({"error": "伺服器錯誤，請稍後再試"}), 500
+
 
 
 @app.route('/logout')
