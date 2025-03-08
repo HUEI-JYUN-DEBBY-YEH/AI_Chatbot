@@ -34,48 +34,50 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 if not openai.api_key:
     raise ValueError("❌ 缺少 OPENAI_API_KEY，請確認Render環境變數設定！")
 
-db_folder = "Output_Vector"
-db_path = os.path.join(db_folder, "vector_database.faiss")
+# ✅ 讀取環境變數
+FAISS_DB_PATH = os.getenv("FAISS_DB_PATH", "C:\\Users\\USER\\OneDrive\\Github\\1. AI ChatBot\\Output_Vector")
+TEXT_DATA_PATH = os.getenv("TEXT_DATA_PATH", "C:\\Users\\USER\\OneDrive\\Github\\1. AI ChatBot\\Output_Clean")
+FAISS_INDEX_FILE = os.path.join(FAISS_DB_PATH, "vector_database.faiss")
 
-faiss_db_path = "/opt/render/project/src/Output_Vector/vector_database.faiss"
-if not os.path.exists(faiss_db_path):
-    print("❌ FAISS 資料庫不存在，請檢查 FAISS_DB_PATH 設定！")
-else:
-    print("✅ FAISS 資料庫存在，繼續執行...")
+# ✅ 確保資料夾存在
+os.makedirs(FAISS_DB_PATH, exist_ok=True)
 
-# 確保資料夾存在
-os.makedirs(db_folder, exist_ok=True)
+# ✅ 初始化模型
+embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", cache_folder="./model_cache")
 
-# 如果檔案不存在，自動建立一個 FAISS 資料庫
-if not os.path.exists(db_path):
+# ✅ 讀取文本並建立向量索引
+documents = []
+document_vectors = []
+
+if os.path.exists(TEXT_DATA_PATH):
+    txt_files = sorted([f for f in os.listdir(TEXT_DATA_PATH) if f.endswith(".txt")])
+
+    for filename in txt_files:
+        file_path = os.path.join(TEXT_DATA_PATH, filename)
+        with open(file_path, "r", encoding="utf-8") as f:
+            text_content = f.read().strip()
+            documents.append(text_content)
+            document_vectors.append(embedding_model.encode(text_content))
+
+# ✅ 檢查 FAISS 是否已經存在
+if not os.path.exists(FAISS_INDEX_FILE):
     print("⚠️ 找不到 FAISS 資料庫，正在建立新的 FAISS 索引！")
-    index = faiss.IndexFlatL2(384)  # 假設向量維度為 384
-    faiss.write_index(index, db_path)
-    print("✅ FAISS 資料庫已建立！")
+    
+    # ✅ 確保 documents 內有資料
+    if documents:
+        index = faiss.IndexFlatL2(384)  # 假設向量維度 384
+        index.add(np.array(document_vectors))  # ✅ 新增向量到索引
+        faiss.write_index(index, FAISS_INDEX_FILE)
+        print("✅ FAISS 資料庫已建立並儲存！")
+    else:
+        print("❌ 錯誤：無法建立 FAISS，因為 `Output_Clean` 內沒有文本檔案！")
 
-# 讀取 FAISS 索引
+# ✅ 讀取 FAISS 資料庫
 try:
-    index = faiss.read_index(faiss_db_path)
+    index = faiss.read_index(FAISS_INDEX_FILE)
     print("✅ FAISS 資料庫成功載入！")
 except Exception as e:
     print(f"❌ FAISS 載入失敗: {e}")
-
-documents = []
-vector_data_folder = os.getenv("FAISS_DB_PATH", "/tmp/Output_Vector")
-print(f"📁 Documents 長度: {len(documents)}")
-if len(documents) == 0:
-    print("❌ 警告：documents 為空，請確認 `Output_Clean` 內有 .txt 檔案！")
-
-
-if os.path.exists(vector_data_folder):  
-    txt_files = sorted([f for f in os.listdir(vector_data_folder) if f.endswith(".txt")])[:1000]  # 限制最多讀 1000 個檔案
-    for filename in txt_files:
-        file_path = os.path.join(vector_data_folder, filename)
-        with open(file_path, "r", encoding="utf-8") as f:
-            documents.append(f.read().strip())   
-
-if not documents:  
-    print("⚠️ 警告：`documents` 為空，請確認 `Output_Clean` 資料夾內有 `.txt` 檔案！")
 
 # ✅ 確保 OpenAI API Key 存在
 api_key = os.getenv("OPENAI_API_KEY")
@@ -182,8 +184,6 @@ def chat():
     except Exception as e:
         print(f"❌ FAISS 測試失敗: {e}")
         return jsonify({"error": "伺服器錯誤，請稍後再試"}), 500
-
-
 
 @app.route('/logout')
 def logout():
