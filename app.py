@@ -154,12 +154,12 @@ def chat():
         client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "你是一個AI助手，請基於 FAISS 提供的背景資訊回答問題。"},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.3,  # 📌 降低隨機性，讓回答更準確
+            temperature=0.7,  # 📌 降低隨機性，讓回答更準確
             max_tokens=500,  # 避免回應過長
             stop=["\n\n"]
         )
