@@ -6,3 +6,4 @@ faiss-cpu
 openai==1.65.2
 sentence_transformers
 dotenv
+jinja2

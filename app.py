@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer
 from datetime import datetime
 from dotenv import load_dotenv
 
-app = Flask (__name__) 
+app = Flask(__name__, template_folder='templates')
 app.secret_key='asdfghjkl0987654321' #設定session安全密鑰
 
 #模擬身分驗證資料庫
