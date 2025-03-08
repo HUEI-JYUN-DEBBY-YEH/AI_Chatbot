@@ -19,7 +19,7 @@ users={
     }
 
 # 設定 Render 提供的 DATABASE_URL
-DATABASE_URL = os.getenv("postgresql://chatbot_aihr_user:5qlSd9DnQ4Qsg1VlkLYUJdYzFi8CkRAH@dpg-cv3dcn3tq21c73bjp2r0-a/chatbot_aihr", "sqlite:///test.db")  # 預設本地 SQLite 以防止環境變數遺失
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///test.db")  # 預設本地 SQLite 以防止環境變數遺失
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -52,14 +52,14 @@ index = faiss.read_index(db_path)
 print("✅ FAISS 資料庫載入成功！")
 
 documents = []
-vector_data_folder = "C:/Users/USER/OneDrive/Github/1. AI ChatBot/Output_Clean"
+vector_data_folder = os.getenv("FAISS_DB_PATH", "/tmp/Output_Vector")
 
-if os.path.exists(vector_data_folder):  # 確保資料夾存在
-    for filename in sorted(os.listdir(vector_data_folder)):  
-        if filename.endswith(".txt"):
-            file_path = os.path.join(vector_data_folder, filename)
-            with open(file_path, "r", encoding="utf-8") as f:
-                documents.append(f.read().strip())  # 讀取並去除空白   
+if os.path.exists(vector_data_folder):  
+    txt_files = sorted([f for f in os.listdir(vector_data_folder) if f.endswith(".txt")])[:1000]  # 限制最多讀 1000 個檔案
+    for filename in txt_files:
+        file_path = os.path.join(vector_data_folder, filename)
+        with open(file_path, "r", encoding="utf-8") as f:
+            documents.append(f.read().strip())   
 
 if not documents:  
     print("⚠️ 警告：`documents` 為空，請確認 `Output_Clean` 資料夾內有 `.txt` 檔案！")
@@ -67,9 +67,12 @@ if not documents:
 
 #初始化LLM(OpenAI GPT API)
 openai.api_key=os.getenv("OPENAI_API_KEY")   #從環境變數讀取API Key
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", cache_folder="./model_cache")
+embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", cache_folder="./model_cache")
 print("模型下載完成，準備運行應用...")
 
+# 定義 embedding 函數
+def embed_text(text):
+    return np.array([embedding_model.encode(text)])
 
 @app.route("/health")
 def health():
@@ -111,7 +114,7 @@ def chat():
     try:
         # 先測試 FAISS 是否可用
         test_query = "測試"
-        user_embedding = embed_text(test_query)
+        user_embedding = embed_text(test_query).reshape(1, -1) #確保是(1, 384)
         distances, indices = index.search(user_embedding, k=1)
         
         retrieved_texts = []
@@ -136,7 +139,7 @@ def chat():
         問題：{user_input}
         """
 
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": prompt},
