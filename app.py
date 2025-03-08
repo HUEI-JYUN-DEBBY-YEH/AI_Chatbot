@@ -37,6 +37,12 @@ if not openai.api_key:
 db_folder = "Output_Vector"
 db_path = os.path.join(db_folder, "vector_database.faiss")
 
+faiss_db_path = "/opt/render/project/src/Output_Vector/vector_database.faiss"
+if not os.path.exists(faiss_db_path):
+    print("❌ FAISS 資料庫不存在，請檢查 FAISS_DB_PATH 設定！")
+else:
+    print("✅ FAISS 資料庫存在，繼續執行...")
+
 # 確保資料夾存在
 os.makedirs(db_folder, exist_ok=True)
 
@@ -48,11 +54,18 @@ if not os.path.exists(db_path):
     print("✅ FAISS 資料庫已建立！")
 
 # 讀取 FAISS 索引
-index = faiss.read_index(db_path)
-print("✅ FAISS 資料庫載入成功！")
+try:
+    index = faiss.read_index(faiss_db_path)
+    print("✅ FAISS 資料庫成功載入！")
+except Exception as e:
+    print(f"❌ FAISS 載入失敗: {e}")
 
 documents = []
 vector_data_folder = os.getenv("FAISS_DB_PATH", "/tmp/Output_Vector")
+print(f"📁 Documents 長度: {len(documents)}")
+if len(documents) == 0:
+    print("❌ 警告：documents 為空，請確認 `Output_Clean` 內有 .txt 檔案！")
+
 
 if os.path.exists(vector_data_folder):  
     txt_files = sorted([f for f in os.listdir(vector_data_folder) if f.endswith(".txt")])[:1000]  # 限制最多讀 1000 個檔案
@@ -115,7 +128,7 @@ def chat():
         # 先測試 FAISS 是否可用
         test_query = "測試"
         user_embedding = embed_text(test_query).reshape(1, -1) #確保是(1, 384)
-        distances, indices = index.search(user_embedding, k=1)
+        distances, indices = index.search(user_embedding, k=3)
         
         retrieved_texts = []
         for idx in indices[0]:
