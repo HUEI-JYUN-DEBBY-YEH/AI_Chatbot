@@ -76,6 +76,34 @@ def health():
     """提供 Render 監測服務運行狀態"""
     return "OK", 200
 
+@app.route('/test_faiss', methods=['GET'])
+def test_faiss():
+    try:
+        FAISS_DB_PATH = os.getenv("FAISS_DB_PATH", "/opt/render/project/src/Output_Vector/vector_database.faiss")
+        
+        if not os.path.exists(FAISS_DB_PATH):
+            return jsonify({"error": "❌ 找不到 FAISS 資料庫，請確認檔案是否存在！"}), 500
+
+        import faiss
+        import numpy as np
+
+        index = faiss.read_index(FAISS_DB_PATH)
+        D = index.d  # 取得 FAISS index 的維度
+        user_embedding = np.random.rand(1, D).astype("float32")
+
+        k = 3
+        distances, indices = index.search(user_embedding, k)
+
+        return jsonify({
+            "message": "✅ FAISS 測試成功！",
+            "indices": indices.tolist(),
+            "distances": distances.tolist()
+        })
+
+    except Exception as e:
+        return jsonify({"error": f"❌ FAISS 測試失敗: {str(e)}"}), 500
+
+
 @app.route("/")
 def home():
     """首頁：Render 需要時回應 AI Chatbot 狀態，否則導向驗證"""
