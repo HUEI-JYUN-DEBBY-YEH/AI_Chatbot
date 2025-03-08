@@ -122,7 +122,7 @@ def chat():
         user_embedding = np.array(user_embedding, dtype=np.float32)
 
         # 在 FAISS 中尋找最相關的文本
-        k = 5
+        k = 3
         distances, indices = index.search(user_embedding, k)
 
         retrieved_texts = []
@@ -133,22 +133,19 @@ def chat():
                 retrieved_texts.append(f"未知內容 (索引 {idx})")
         print(f"🔍 FAISS 提供的背景資料:\n{retrieved_texts}")
 
-        # ✅ 這裡加上限制最多取3 條資料，並限制總長度
+        # ✅ 這裡加上限制最多取2 條資料，並限制總長度
         MAX_TOKENS = 1000 
-        merged_texts = " ".join(retrieved_texts[:5])[:500]  # 取最多 5 個文檔 & 限制 500 tokens
+        merged_texts = " ".join(retrieved_texts[:2])[:500]  # 取最多 2個文檔 & 限制 500 tokens
         merged_texts = merged_texts[:merged_texts.rfind(" ")]  # 確保不截斷單詞
 
         #設計Prompt，確保AI聚焦在FAISS檢索道的資料
         prompt = f"""
-        你是一個專業 AI 助手，請根據提供的背景資料回答問題。  
-        如果背景資料不足，你可以根據你的知識做簡要回答。  
-        但請保持回應清晰、具體，並確保邏輯正確。
-
-        ⚠️ **請遵守以下規則**
-        - **優先使用背景資料回答**，但如果資料不足，請根據你的知識簡要回應。
-        - **禁止回應「對不起，我無法回答此問題」**，請至少提供部分資訊或推測方向。
-        - **請保持回答清晰且具體，避免回答過於簡短或過度推測。**
-        - **請確保回應不超過 150 字**。
+        你是一個 AI 助手，**只能根據提供的背景資料回答問題**，不可自行推測或編造答案。  
+        如果背景資料不足，請回答：「無法找到相關資料，請提供更多資訊。」  
+        請遵守以下規則：
+        1. **你的回答必須來自 FAISS 背景資料，不能使用你自己的知識。**
+        2. **如果背景資料沒有明確答案，請回答：「無法找到相關資料，請提供更多資訊。」**
+        3. **請確保回答內容準確，不可錯誤解讀背景資料。**
 
         🔍 **背景資料**
         {retrieved_texts}
