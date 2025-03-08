@@ -131,12 +131,12 @@ def chat():
                 retrieved_texts.append(documents[idx])
             else:
                 retrieved_texts.append(f"未知內容 (索引 {idx})")
+        print(f"🔍 Retrieved Texts: {retrieved_texts}")
 
         # ✅ 這裡加上限制最多取3 條資料，並限制總長度
         MAX_TOKENS = 1000 
         merged_texts = " ".join(retrieved_texts[:3])
         merged_texts = merged_texts[:merged_texts.rfind(" ")]  # 確保不截斷單詞
-
 
         #設計Prompt，確保AI聚焦在FAISS檢索道的資料
         prompt = f"""
@@ -149,23 +149,25 @@ def chat():
         {merged_texts}
         """
 
-
         # ✅ 使用OpenAI API 進行回應
         client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "你是一個AI助手，請基於 FAISS 提供的背景資訊回答問題。"},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,  # 📌 降低隨機性，讓回答更準確
-            max_tokens=500,  # 避免回應過長
-            stop=["\n\n"]
-        )
-
-        answer = response.choices[0].message.content  # ✅ 正確取得回答內容
-
+        try: 
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "你是一個AI助手，請基於 FAISS 提供的背景資訊回答問題。"},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.3,  # 📌 降低隨機性，讓回答更準確
+                max_tokens=500,  # 避免回應過長
+                stop=["\n\n"]
+            )
+            answer = response.choices[0].message.content  # ✅ 正確取得回答內容
+            print(f"🤖 AI 回應: {answer}")
+        except Exception as e:
+            print(f"❌ OpenAI API Error: {e}")
+            answer = "對不起，我無法處理您的請求。"
+        
         return jsonify({"response": answer})
 
     except Exception as e:
