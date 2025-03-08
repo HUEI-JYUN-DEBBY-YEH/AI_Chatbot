@@ -94,10 +94,9 @@ embedding_model = SentenceTransformer(
 )
 print("✅ LLM 模型下載完成，準備運行應用...")
 
-# ✅ 定義 embedding 函數，確保輸出格式符合 FAISS 要求
+# ✅ 定義 embedding 函數
 def embed_text(text):
-    embedding = embedding_model.encode(text)
-    return np.array(embedding).reshape(1, -1)  # ✅ 確保 shape 為 (1, 384)
+    return np.array([embedding_model.encode(text)]).astype(np.float32)
 
 @app.route("/health")
 def health():
