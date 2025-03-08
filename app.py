@@ -132,17 +132,34 @@ def chat():
             else:
                 retrieved_texts.append(f"未知內容 (索引 {idx})")
 
-        # ✅ 這裡加上限制前 2 條文本
-        retrieved_texts = retrieved_texts[:2]
+        # ✅ 這裡加上限制最多取3 條資料，並限制總長度
+        MAX_TOKENS = 1000 
+        merged_texts = " ".join(retrieved_texts[:3])[:MAX_TOKENS]
 
-        prompt = f"使用者問題: {user_input}\n\n相關背景資料:\n{retrieved_texts[:500]}\n\n請根據以上內容回答:"
+        #設計Prompt，確保AI聚焦在FAISS檢索道的資料
+        prompt = f"""
+        你是一個AI助手，請根據以下背景資訊回答用戶的問題。
+        請注意：
+        1. 你只能使用提供的背景資訊，不要自行發揮。
+        2. 如果背景資訊中沒有答案，請回答 "對不起，我無法回答這個問題。"
+        3. 你的回答應該簡明扼要，不超過150個字。
 
-        # ✅ 改用新的 OpenAI API 語法
+        🔹 使用者問題：{user_input}
+        🔹 相關背景資料：
+        {merged_texts}
+        """
+
+        # ✅ 使用OpenAI API 進行回應
         client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[
+                {"role": "system", "content": "你是一個AI助手，請基於 FAISS 提供的背景資訊回答問題。"},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,  # 📌 降低隨機性，讓回答更準確
+            max_tokens=500  # 避免回應過長
         )
 
         answer = response.choices[0].message.content  # ✅ 正確取得回答內容
