@@ -159,7 +159,7 @@ def chat():
             if 0 <= idx < len(documents):
                 text = documents[idx][:300]  # ✅ 限制每個文本最多 300 字
                 retrieved_texts.append(text)
-             else:
+            else:
                 retrieved_texts.append(f"未知內容 (索引 {idx})")
 
         print(f"🔍 FAISS 搜索結果：{retrieved_texts}")
