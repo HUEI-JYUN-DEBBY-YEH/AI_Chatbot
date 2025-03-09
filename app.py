@@ -50,7 +50,7 @@ documents = []
 document_vectors = []
 
 if os.path.exists(TEXT_DATA_PATH):
-    txt_files = sorted([f for f in os.listdir(TEXT_DATA_PATH) if f.endswith(".txt")])
+    txt_files = sorted([f for f in os.listdir(TEXT_DATA_PATH) if f.endswith(".txt")])[:500]
 
     for filename in txt_files:
         file_path = os.path.join(TEXT_DATA_PATH, filename)
@@ -74,6 +74,7 @@ if not os.path.exists(FAISS_INDEX_FILE):
             pickle.dump(documents, f)
         
         print("✅ FAISS 資料庫已建立並儲存！")
+        print(f"📁 Documents 長度: {len(documents)}")
     else:
         print("❌ 錯誤：無法建立 FAISS，因為 `Output_Clean` 內沒有文本檔案！")
 
@@ -87,6 +88,8 @@ try:
             documents = pickle.load(f)
     
     print("✅ FAISS 資料庫成功載入！")
+    print(f"📁 Documents 長度: {len(documents)}")
+    print(f"📂 Documents 長度: {len(documents)}, 向量數量: {len(document_vectors)}")
 except Exception as e:
     print(f"❌ FAISS 載入失敗: {e}")
 
