@@ -43,7 +43,7 @@ PICKLE_FILE = os.path.join(FAISS_DB_PATH, "documents.pkl")
 os.makedirs(FAISS_DB_PATH, exist_ok=True)
 
 # ✅ 初始化模型
-embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", device="cpu", cache_folder="./model_cache")
+embedding_model = SentenceTransformer("model_cache/sentence-transformers_all-MiniLM-L6-V2", device="cpu")
 
 # ✅ 讀取文本並建立向量索引
 documents = []
@@ -63,7 +63,7 @@ if os.path.exists(TEXT_DATA_PATH):
 if documents and document_vectors:
     #FAISS初始化
     d = 384  # 向量維度
-    nlist = 50  # 設定分割的數量
+    nlist = max(1, len(document_vectors) // 40)  # 讓 centroids 數量適應你的數據
     quantizer = faiss.IndexFlatL2(d)  # 量化器
     index = faiss.IndexIVFFlat(quantizer, d, nlist, faiss.METRIC_L2)
     
