@@ -221,6 +221,7 @@ def history():
         }
         for r in records
     ]
+    return Response(json.dumps(history_data, ensure_ascii=False), content_type="application/json; charset=utf-8")
 
 
 # ✅ 查詢所有使用者的對話歷史紀錄 (新增的 API)
@@ -236,9 +237,7 @@ def check_history():
         }
         for r in records
     ]
-    return jsonify(history_data)
-return Response(json.dumps(history_data, ensure_ascii=False), content_type="application/json; charset=utf-8")
-
+    return Response(json.dumps(history_data, ensure_ascii=False), content_type="application/json; charset=utf-8")
 
 # ✅ 設定 ChatHistory 資料表
 class ChatHistory(db.Model):
