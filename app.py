@@ -11,9 +11,9 @@ import pickle
 import json
 
 app = Flask(__name__, template_folder='template')
-app.secret_key = 'asdfghjkl0987654321'  # 設定 session 安全密鑰
+app.secret_key = 'YOUR_SECRET_KEY'  # 設定你的session安全密鑰
 
-# 模擬身分驗證資料庫
+# 模擬身分驗證資料庫(以下是範例)
 users = {
     "David Chou": "A123456789",
     "Vivian Kuo": "B223348910",
@@ -35,8 +35,8 @@ if not openai.api_key:
     raise ValueError("❌ 缺少 OPENAI_API_KEY，請確認 Render 環境變數設定！")
 
 # ✅ 讀取環境變數
-FAISS_DB_PATH = os.getenv("FAISS_DB_PATH", "/opt/render/project/src/Output_Vector")
-TEXT_DATA_PATH = os.getenv("TEXT_DATA_PATH", "/opt/render/project/src/Output_Clean")
+FAISS_DB_PATH = os.getenv("FAISS_DB_PATH", "YOUR_FAISS_DB_PATH_IN_RENDER")
+TEXT_DATA_PATH = os.getenv("TEXT_DATA_PATH", "YOUR_TEXT_DATA_PATH_IN_RENDER")
 FAISS_INDEX_FILE = os.path.join(FAISS_DB_PATH, "vector_database.faiss")
 PICKLE_FILE = os.path.join(FAISS_DB_PATH, "documents.pkl")
 
@@ -99,7 +99,6 @@ try:
             documents = pickle.load(f)
     
     print("✅ FAISS 資料庫成功載入！")
-    print(f"📁 Documents 長度: {len(documents)}")
     print(f"📂 Documents 長度: {len(documents)}, 向量數量: {len(document_vectors)}")
 except Exception as e:
     print(f"❌ FAISS 載入失敗: {e}")
@@ -149,7 +148,6 @@ def chat():
         if not user_input:
             return jsonify({"response": "請輸入有效的問題"}), 400
 
-        print("🔍 測試 FAISS 檢索...")
         user_embedding = embed_text(user_input)
         distances, indices = index.search(user_embedding, k=3)
         print("✅ FAISS 測試成功")
