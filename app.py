@@ -42,8 +42,15 @@ PICKLE_FILE = os.path.join(FAISS_DB_PATH, "documents.pkl")
 # ✅ 確保資料夾存在
 os.makedirs(FAISS_DB_PATH, exist_ok=True)
 
-# ✅ 初始化模型
-embedding_model = SentenceTransformer("model_cache/sentence-transformers_all-MiniLM-L6-v2", device="cpu")
+# 讀取 Hugging Face Token
+hf_token = os.getenv("HUGGINGFACE_TOKEN")
+
+# 設定 cache folder 並下載模型
+embedding_model = SentenceTransformer(
+    "sentence-transformers/all-MiniLM-L6-V2", 
+    cache_folder="./model_cache", 
+    use_auth_token=hf_token  # 使用 Hugging Face Token
+)
 
 # ✅ 讀取文本並建立向量索引
 documents = []
