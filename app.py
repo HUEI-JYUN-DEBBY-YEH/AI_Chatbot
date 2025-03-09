@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, session, redirect, url_for, jsonify
+from flask import Flask, request, render_template, session, redirect, url_for, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
 import os
 import faiss
@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 from datetime import datetime
 from dotenv import load_dotenv
 import pickle
+import json
 
 app = Flask(__name__, template_folder='template')
 app.secret_key = 'asdfghjkl0987654321'  # 設定 session 安全密鑰
@@ -221,11 +222,6 @@ def history():
         for r in records
     ]
 
-    # 使用 Response 物件，確保 JSON 不會變成 Unicode 轉義格式
-    from flask import Response
-    import json
-
-    return Response(json.dumps(history_data, ensure_ascii=False), content_type="application/json; charset=utf-8")
 
 # ✅ 查詢所有使用者的對話歷史紀錄 (新增的 API)
 @app.route("/api/check_history", methods=["GET"])
@@ -241,6 +237,8 @@ def check_history():
         for r in records
     ]
     return jsonify(history_data)
+return Response(json.dumps(history_data, ensure_ascii=False), content_type="application/json; charset=utf-8")
+
 
 # ✅ 設定 ChatHistory 資料表
 class ChatHistory(db.Model):
