@@ -157,8 +157,9 @@ def chat():
         retrieved_texts = []
         for idx in indices[0]:
             if 0 <= idx < len(documents):
-                retrieved_texts.append(documents[idx])
-            else:
+                text = documents[idx][:300]  # ✅ 限制每個文本最多 300 字
+                retrieved_texts.append(text)
+             else:
                 retrieved_texts.append(f"未知內容 (索引 {idx})")
 
         print(f"🔍 FAISS 搜索結果：{retrieved_texts}")
@@ -181,7 +182,8 @@ def chat():
                 {"role": "user", "content": "請提供回答"},
             ],
             temperature=0,
-            max_tokens=300
+            max_tokens=150,
+            stop=["\n\n"]  # ✅ 讓回應在雙換行時結束
         )
 
         answer = response.choices[0].message.content
