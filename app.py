@@ -50,7 +50,7 @@ documents = []
 document_vectors = []
 
 if os.path.exists(TEXT_DATA_PATH):
-    txt_files = sorted([f for f in os.listdir(TEXT_DATA_PATH) if f.endswith(".txt")])[:50]
+    txt_files = sorted([f for f in os.listdir(TEXT_DATA_PATH) if f.endswith(".txt")])[:100]
 
     for filename in txt_files:
         file_path = os.path.join(TEXT_DATA_PATH, filename)
