@@ -45,15 +45,6 @@ os.makedirs(FAISS_DB_PATH, exist_ok=True)
 # ✅ 初始化模型
 embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", device="cpu", cache_folder="./model_cache")
 
-#FAISS初始化
-d = 384  # 向量維度
-nlist = 50  # 設定分割的數量
-quantizer = faiss.IndexFlatL2(d)  # 量化器
-index = faiss.IndexIVFFlat(quantizer, d, nlist, faiss.METRIC_L2)
-index.train(np.array(document_vectors).astype(np.float32))  # 訓練
-index.add(np.array(document_vectors).astype(np.float32))  # 新增資料
-faiss.write_index(index, FAISS_INDEX_FILE)
-
 # ✅ 讀取文本並建立向量索引
 documents = []
 document_vectors = []
@@ -68,24 +59,27 @@ if os.path.exists(TEXT_DATA_PATH):
             documents.append(text_content)
             document_vectors.append(embedding_model.encode(text_content))
 
-# ✅ 檢查 FAISS 是否已經存在
-if not os.path.exists(FAISS_INDEX_FILE):
-    print("⚠️ 找不到 FAISS 資料庫，正在建立新的 FAISS 索引！")
+# ✅ 確保 `document_vectors` 在 FAISS 初始化前已經有資料
+if documents and document_vectors:
+    #FAISS初始化
+    d = 384  # 向量維度
+    nlist = 50  # 設定分割的數量
+    quantizer = faiss.IndexFlatL2(d)  # 量化器
+    index = faiss.IndexIVFFlat(quantizer, d, nlist, faiss.METRIC_L2)
+    
+    index.train(np.array(document_vectors).astype(np.float32))  # ✅ 這裡才執行訓練
+    index.add(np.array(document_vectors).astype(np.float32))  # ✅ 這裡新增資料
+    faiss.write_index(index, FAISS_INDEX_FILE)  # ✅ 寫入索引
+    
+    # ✅ **儲存 `documents` 以便未來查找對應文本**
+    with open(PICKLE_FILE, "wb") as f:
+        pickle.dump(documents, f)
 
-    # ✅ 確保 documents 內有資料
-    if documents:
-        index = faiss.IndexFlatL2(384)  # 假設向量維度 384
-        index.add(np.array(document_vectors))  # ✅ 新增向量到索引
-        faiss.write_index(index, FAISS_INDEX_FILE)
-        
-        # ✅ 儲存 `documents` 以便未來查找對應文本
-        with open(PICKLE_FILE, "wb") as f:
-            pickle.dump(documents, f)
-        
-        print("✅ FAISS 資料庫已建立並儲存！")
-        print(f"📁 Documents 長度: {len(documents)}")
-    else:
-        print("❌ 錯誤：無法建立 FAISS，因為 `Output_Clean` 內沒有文本檔案！")
+    print("✅ FAISS 資料庫已建立並儲存！")
+    print(f"📁 Documents 長度: {len(documents)}")
+else:
+    print("❌ 錯誤：無法建立 FAISS，因為 `document_vectors` 為空！")
+
 
 # ✅ 讀取 FAISS 資料庫
 try:
