@@ -43,7 +43,16 @@ PICKLE_FILE = os.path.join(FAISS_DB_PATH, "documents.pkl")
 os.makedirs(FAISS_DB_PATH, exist_ok=True)
 
 # ✅ 初始化模型
-embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", device="cpu", cache_folder="./model_cache")
+embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L12-H384", device="cpu", cache_folder="./model_cache")
+
+#FAISS初始化
+d = 384  # 向量維度
+nlist = 50  # 設定分割的數量
+quantizer = faiss.IndexFlatL2(d)  # 量化器
+index = faiss.IndexIVFFlat(quantizer, d, nlist, faiss.METRIC_L2)
+index.train(np.array(document_vectors).astype(np.float32))  # 訓練
+index.add(np.array(document_vectors).astype(np.float32))  # 新增資料
+faiss.write_index(index, FAISS_INDEX_FILE)
 
 # ✅ 讀取文本並建立向量索引
 documents = []
@@ -142,6 +151,7 @@ def chat():
         user_embedding = embed_text(user_input)
         distances, indices = index.search(user_embedding, k=3)
         print("✅ FAISS 測試成功")
+        print(f"📌 FAISS 搜尋結果 - 距離: {distances}, 索引: {indices}")
 
         retrieved_texts = []
         for idx in indices[0]:
