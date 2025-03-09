@@ -43,14 +43,14 @@ PICKLE_FILE = os.path.join(FAISS_DB_PATH, "documents.pkl")
 os.makedirs(FAISS_DB_PATH, exist_ok=True)
 
 # ✅ 初始化模型
-embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", cache_folder="./model_cache")
+embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", device="cpu", cache_folder="./model_cache")
 
 # ✅ 讀取文本並建立向量索引
 documents = []
 document_vectors = []
 
 if os.path.exists(TEXT_DATA_PATH):
-    txt_files = sorted([f for f in os.listdir(TEXT_DATA_PATH) if f.endswith(".txt")])[:500]
+    txt_files = sorted([f for f in os.listdir(TEXT_DATA_PATH) if f.endswith(".txt")])[:50]
 
     for filename in txt_files:
         file_path = os.path.join(TEXT_DATA_PATH, filename)
@@ -133,12 +133,15 @@ def chat():
     try:
         data = request.get_json()
         user_input = data.get("message", "")
+        print(f"使用者輸入: {user_input}")
 
         if not user_input:
             return jsonify({"response": "請輸入有效的問題"}), 400
 
+        print("🔍 測試 FAISS 檢索...")
         user_embedding = embed_text(user_input)
         distances, indices = index.search(user_embedding, k=3)
+        print("✅ FAISS 測試成功")
 
         retrieved_texts = []
         for idx in indices[0]:
@@ -152,6 +155,7 @@ def chat():
         if all("未知內容" in text for text in retrieved_texts):
             return jsonify({"error": "❌ FAISS 搜索無效，請確認索引庫內容"}), 500
 
+        print("📝 呼叫 OpenAI API 中...")
         prompt = f"""
         你是一個 AI 助手，請根據 FAISS 提供的背景資訊回答問題。
         背景資料：{retrieved_texts}
@@ -170,6 +174,7 @@ def chat():
         )
 
         answer = response.choices[0].message.content
+        print(f"💬 OpenAI 回應: {answer}")
 
         # ✅ 儲存對話到資料庫
         chat_record = ChatHistory(
