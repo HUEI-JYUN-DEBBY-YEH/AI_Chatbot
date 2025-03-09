@@ -211,10 +211,21 @@ def history():
         return jsonify({"error": "請先登入"}), 401
 
     records = ChatHistory.query.filter_by(username=session["username"]).all()
-    return jsonify([
-        {"user_message": r.user_message, "bot_response": r.bot_response, "timestamp": r.timestamp.strftime("%Y-%m-%d %H:%M:%S")}
+    history_data = [
+        {
+            "user": r.username,
+            "question": r.user_message,
+            "answer": r.bot_response,
+            "timestamp": r.timestamp
+        }
         for r in records
-    ])
+    ]
+
+    # 使用 Response 物件，確保 JSON 不會變成 Unicode 轉義格式
+    from flask import Response
+    import json
+
+    return Response(json.dumps(history_data, ensure_ascii=False), content_type="application/json; charset=utf-8")
 
 # ✅ 查詢所有使用者的對話歷史紀錄 (新增的 API)
 @app.route("/api/check_history", methods=["GET"])
