@@ -204,7 +204,7 @@ def chat():
         print(f"❌ FAISS 測試失敗: {e}")
         return jsonify({"error": "伺服器錯誤，請稍後再試"}), 500
 
-# ✅ 對話歷史紀錄
+# ✅ 查詢當前登入使用者的對話歷史紀錄
 @app.route("/api/history", methods=["GET"])
 def history():
     if "username" not in session:
@@ -212,9 +212,24 @@ def history():
 
     records = ChatHistory.query.filter_by(username=session["username"]).all()
     return jsonify([
-        {"user_message": r.user_message, "bot_response": r.bot_response, "timestamp": r.timestamp}
+        {"user_message": r.user_message, "bot_response": r.bot_response, "timestamp": r.timestamp.strftime("%Y-%m-%d %H:%M:%S")}
         for r in records
     ])
+
+# ✅ 查詢所有使用者的對話歷史紀錄 (新增的 API)
+@app.route("/api/check_history", methods=["GET"])
+def check_history():
+    records = ChatHistory.query.all()
+    history_data = [
+        {
+            "user": r.username,
+            "question": r.user_message,
+            "answer": r.bot_response,
+            "timestamp": r.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for r in records
+    ]
+    return jsonify(history_data)
 
 # ✅ 設定 ChatHistory 資料表
 class ChatHistory(db.Model):
