@@ -13,14 +13,14 @@
 - 向量模型：`sentence-transformers/all-MiniLM-L6-V2`
 - 資料庫：SQLAlchemy（支援 PostgreSQL / SQLite）
 
+🔥未來擴展
+✅ 改進回應的準確度
+✅ 增加多語言支持
+✅ 支援 PDF / Word 文本處理
+
 🚀 快速開始
 ```bash
 git clone https://github.com/你的帳號/AI_Chatbot_Project.git
 cd AI_Chatbot_Project
 pip install -r requirements.txt
 python app.py
-
-🔥未來擴展
-✅ 改進回應的準確度
-✅ 增加多語言支持
-✅ 支援 PDF / Word 文本處理
