@@ -11,7 +11,7 @@ import pickle
 import json
 
 app = Flask(__name__, template_folder='template')
-app.secret_key = 'YOUR_SECRET_KEY'  # 設定你的session安全密鑰
+app.secret_key = 'asdfghjkl123456789'  # 設定你的session安全密鑰
 
 # 模擬身分驗證資料庫(以下是範例)
 users = {
