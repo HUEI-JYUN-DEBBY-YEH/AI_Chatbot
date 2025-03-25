@@ -10,8 +10,6 @@ from dotenv import load_dotenv
 from datetime import datetime
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from download_model import download_finetuned_model
-download_finetuned_model()  # 自動抓模型
 
 # === 初始化 Flask ===
 app = Flask(__name__, template_folder='template')
@@ -44,14 +42,16 @@ with app.app_context():
 # === 模型與資料路徑 ===
 label2id = json.load(open("label2id.json", encoding="utf-8"))
 id2label = {v: k for k, v in label2id.items()}
-tokenizer = AutoTokenizer.from_pretrained("./finetuned_laborlaw_model")
-model = AutoModelForSequenceClassification.from_pretrained("./finetuned_laborlaw_model")
+
+# ✅ 改為從 Hugging Face 載入公開模型
+tokenizer = AutoTokenizer.from_pretrained("DEBBY-YEH/finetuned-laborlaw-bert")
+model = AutoModelForSequenceClassification.from_pretrained("DEBBY-YEH/finetuned-laborlaw-bert")
 model.eval()
 
 with open("classified_chunks_cleaned.json", "r", encoding="utf-8") as f:
     chunk_data = json.load(f)
 
-embedding_model = SentenceTransformer("./embedding_model")
+embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 def predict_category(text):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
