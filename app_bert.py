@@ -44,8 +44,8 @@ with app.app_context():
 # === 模型與資料路徑 ===
 label2id = json.load(open("label2id.json", encoding="utf-8"))
 id2label = {v: k for k, v in label2id.items()}
-tokenizer = AutoTokenizer.from_pretrained("finetuned_laborlaw_model")
-model = AutoModelForSequenceClassification.from_pretrained("finetuned_laborlaw_model")
+tokenizer = AutoTokenizer.from_pretrained("./finetuned_laborlaw_model")
+model = AutoModelForSequenceClassification.from_pretrained("./finetuned_laborlaw_model")
 model.eval()
 
 with open("classified_chunks_cleaned.json", "r", encoding="utf-8") as f:
