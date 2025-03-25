@@ -11,6 +11,10 @@ from datetime import datetime
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
+# === 載入環境變數與 OpenAI Key ===
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 # === 初始化 Flask ===
 app = Flask(__name__, template_folder='template')
 app.secret_key = 'asdfghjkl123456789'
@@ -18,17 +22,12 @@ app.secret_key = 'asdfghjkl123456789'
 # === 使用者帳密（範例） ===
 users = {"David Chou": "A123456789"}
 
-# === 載入環境變數與 OpenAI Key ===
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
 # === 資料庫設定 ===
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///test.db")
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# === 建立 DB ===
 db = SQLAlchemy(app)
+
+# === ChatHistory模型 ===
 class ChatHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False)
@@ -39,27 +38,17 @@ class ChatHistory(db.Model):
 with app.app_context():
     db.create_all()
 
-# === 模型與資料路徑 ===
-label2id = json.load(open("label2id.json", encoding="utf-8"))
+# === ✅ 載入 BERT fine-tuned 模型 ===
+model_name = "DEBBY-YEH/finetuned-laborlaw-bert"
+bert_tokenizer = AutoTokenizer.from_pretrained(model_name)
+bert_model = AutoModelForSequenceClassification.from_pretrained(model_name)
+label2id = {'特休': 0, '工會': 1, '勞動契約': 2, '工時': 3, '職災': 4, '派遣': 5, '產假育嬰': 6, '工資': 7, '職場歧視': 8}
 id2label = {v: k for k, v in label2id.items()}
 
-# ✅ 改為從 Hugging Face 載入公開模型
-tokenizer = AutoTokenizer.from_pretrained("DEBBY-YEH/finetuned-laborlaw-bert")
-model = AutoModelForSequenceClassification.from_pretrained("DEBBY-YEH/finetuned-laborlaw-bert")
-model.eval()
-
-with open("classified_chunks_cleaned.json", "r", encoding="utf-8") as f:
-    chunk_data = json.load(f)
-
+# === ✅ 載入向量模型（可省略 GPT 調用）===
 embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
-def predict_category(text):
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
-    with torch.no_grad():
-        logits = model(**inputs).logits
-        pred_id = torch.argmax(logits, dim=1).item()
-    return id2label[pred_id]
-
+# === ✅ 首頁 ===
 @app.route("/")
 def home():
     if "username" not in session:
@@ -84,6 +73,7 @@ def mainpage():
         return redirect(url_for("verification"))
     return render_template("chatbot_mainpage.html")
 
+# === ✅ 問答主邏輯 ===
 @app.route("/api/chat", methods=["POST"])
 def chat():
     if "username" not in session:
@@ -134,35 +124,18 @@ def chat():
         print(f"❌ BERT-GPT 模式失敗：{e}")
         return jsonify({"error": "伺服器錯誤，請稍後再試"}), 500
 
+# === ✅ 提供歷史 API（for JSON下載）===
 @app.route("/api/history", methods=["GET"])
-def history():
-    if "username" not in session:
-        return jsonify({"error": "請先登入"}), 401
-    records = ChatHistory.query.filter_by(username=session["username"]).all()
-    history_data = [
-        {
-            "user": r.username,
-            "question": r.user_message,
-            "answer": r.bot_response,
-            "timestamp": r.timestamp
-        }
-        for r in records
-    ]
-    return Response(json.dumps(history_data, ensure_ascii=False), content_type="application/json; charset=utf-8")
+def get_history():
+    username = session.get("username", "Guest")
+    history = ChatHistory.query.filter_by(username=username).order_by(ChatHistory.timestamp).all()
+    result = [{"question": h.question, "answer": h.answer, "timestamp": h.timestamp.isoformat()} for h in history]
+    return jsonify(result)
 
-@app.route("/api/check_history", methods=["GET"])
-def check_history():
-    records = ChatHistory.query.all()
-    history_data = [
-        {
-            "user": r.username,
-            "question": r.user_message,
-            "answer": r.bot_response,
-            "timestamp": r.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-        }
-        for r in records
-    ]
-    return Response(json.dumps(history_data, ensure_ascii=False), content_type="application/json; charset=utf-8")
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("verification"))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
