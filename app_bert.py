@@ -129,7 +129,7 @@ def chat():
 def get_history():
     username = session.get("username", "Guest")
     history = ChatHistory.query.filter_by(username=username).order_by(ChatHistory.timestamp).all()
-    result = [{"question": h.question, "answer": h.answer, "timestamp": h.timestamp.isoformat()} for h in history]
+    result = [{"question": h.user_message, "answer": h.bot_response, "timestamp": h.timestamp.isoformat()} for h in history]
     return jsonify(result)
 
 @app.route("/logout")

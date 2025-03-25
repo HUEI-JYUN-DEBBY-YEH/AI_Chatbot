@@ -6,3 +6,4 @@ safetensors
 huggingface_hub
 openai==0.28.1
 python-dotenv
+psycopg2-binary
