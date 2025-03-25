@@ -28,11 +28,13 @@ app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 db = SQLAlchemy(app)
 
 # === ChatHistory模型 ===
-class ChatHistory(db.Model):
+class BERTChatHistory(db.Model):
+    __tablename__ = 'bert_chat_history'  # ✅ 使用不同表名
+
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), nullable=False)
-    user_message = db.Column(db.Text, nullable=False)
-    bot_response = db.Column(db.Text, nullable=False)
+    user_input = db.Column(db.Text)
+    bert_label = db.Column(db.String(50))
+    gpt_response = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 with app.app_context():
