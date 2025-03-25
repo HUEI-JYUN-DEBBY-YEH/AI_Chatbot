@@ -51,7 +51,7 @@ model = AutoModelForSequenceClassification.from_pretrained("finetuned_laborlaw_m
 model.eval()
 
 # === 載入 chunk 分類對應資料 ===
-with open(os.path.join(TEXT_DATA_PATH, "classified_chunks.json"), "r", encoding="utf-8") as f:
+with open(os.path.join(TEXT_DATA_PATH, "classified_chunks_cleaned.json"), "r", encoding="utf-8") as f:
     chunk_data = json.load(f)  # {"工時": [chunk1, chunk2...], "工資": [...], ...}
 
 # === 載入嵌入模型 ===
