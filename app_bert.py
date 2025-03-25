@@ -45,6 +45,10 @@ bert_model = AutoModelForSequenceClassification.from_pretrained(model_name)
 label2id = {'特休': 0, '工會': 1, '勞動契約': 2, '工時': 3, '職災': 4, '派遣': 5, '產假育嬰': 6, '工資': 7, '職場歧視': 8}
 id2label = {v: k for k, v in label2id.items()}
 
+# === ✅ 載入 chunks（分類好的資料）===
+with open("classified_chunks_cleaned.json", "r", encoding="utf-8") as f:
+    chunk_data = json.load(f)
+
 # === ✅ 載入向量模型（可省略 GPT 調用）===
 embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
