@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from datetime import datetime
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from download_model import download_finetuned_model
+download_finetuned_model()  # 自動抓模型
 
 # === 初始化 Flask ===
 app = Flask(__name__, template_folder='template')
