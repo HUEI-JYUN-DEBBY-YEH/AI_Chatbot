@@ -46,7 +46,15 @@ bert_tokenizer = AutoTokenizer.from_pretrained(model_name)
 bert_model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
 # ✅ label 對應
-label2id = {'特休': 0, '工會': 1, '勞動契約': 2, '工時': 3, '職災': 4, '派遣': 5, '產假育嬰': 6, '工資': 7, '職場歧視': 8}
+label2id = {
+  "假別": 0,
+  "其他": 1,
+  "契約與聘僱關係": 2,
+  "工時": 3,
+  "終止與解僱": 4,
+  "職場安全與性別平等": 5,
+  "薪資": 6
+}
 id2label = {v: k for k, v in label2id.items()}
 
 # === ✅ 載入 chunks（分類好的資料）===
@@ -105,7 +113,15 @@ def chat():
         chunks = chunk_data.get(predicted_label, [])[:3]  # 取前3筆分類內 chunk
         
         if not chunks:
-            return jsonify({"response": f"❌ 未找到分類 {predicted_label} 的資料。"})
+            answer = f"❌ 未找到分類 {predicted_label} 的資料。"
+            new_record = BERTChatHistory(
+                user_input=user_input,
+                bert_label=predicted_label,
+                gpt_response=answer
+            )
+            db.session.add(new_record)
+            db.session.commit()
+            return jsonify({"response": answer})
 
         print(f"📌 BERT 分類結果：{predicted_label}")
 
