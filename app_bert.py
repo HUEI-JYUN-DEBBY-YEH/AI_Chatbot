@@ -40,22 +40,16 @@ with app.app_context():
     db.create_all()
 
 # === 模型與資料路徑 ===
-TEXT_DATA_PATH = os.getenv("TEXT_DATA_PATH", "YOUR_TEXT_DATA_PATH_IN_RENDER")
-hf_token = os.getenv("HUGGINGFACE_TOKEN")
-
-# === 載入 BERT 分類器 ===
 label2id = json.load(open("label2id.json", encoding="utf-8"))
 id2label = {v: k for k, v in label2id.items()}
 tokenizer = AutoTokenizer.from_pretrained("finetuned_laborlaw_model")
 model = AutoModelForSequenceClassification.from_pretrained("finetuned_laborlaw_model")
 model.eval()
 
-# === 載入 chunk 分類對應資料 ===
-with open(os.path.join(TEXT_DATA_PATH, "classified_chunks_cleaned.json"), "r", encoding="utf-8") as f:
-    chunk_data = json.load(f)  # {"工時": [chunk1, chunk2...], "工資": [...], ...}
+with open("classified_chunks_cleaned.json", "r", encoding="utf-8") as f:
+    chunk_data = json.load(f)
 
-# === 載入嵌入模型 ===
-embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-V2", cache_folder="./model_cache", use_auth_token=hf_token)
+embedding_model = SentenceTransformer("./embedding_model")
 
 def predict_category(text):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
@@ -112,8 +106,7 @@ def chat():
         問題：{user_input}
         """
 
-        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": prompt},
@@ -123,7 +116,7 @@ def chat():
             max_tokens=150,
             stop=["\n\n"]
         )
-        answer = response.choices[0].message.content
+        answer = response.choices[0].message["content"]
 
         chat_record = ChatHistory(
             username=session["username"],
@@ -171,4 +164,5 @@ def check_history():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
+    print("🚀 Flask 準備啟動中...")
     app.run(host="0.0.0.0", port=port, debug=True)
