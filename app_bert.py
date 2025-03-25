@@ -155,7 +155,7 @@ def get_history():
         }
         for h in history
     ]
-    return jsonify(result)
+    return Response(json.dumps(result, ensure_ascii=False), mimetype='application/json')
 
 with app.app_context():
     count = BERTChatHistory.query.count()
