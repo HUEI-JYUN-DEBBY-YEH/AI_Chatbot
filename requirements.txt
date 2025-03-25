@@ -1,9 +1,8 @@
 flask
-flask-sqlalchemy
-psycopg2
-gunicorn
-faiss-cpu
-openai==1.65.2
-sentence_transformers
-dotenv
-jinja2
+flask_sqlalchemy
+transformers>=4.35
+sentence-transformers
+safetensors
+huggingface_hub
+openai==0.28.1
+python-dotenv
