@@ -1,23 +1,26 @@
 import os
-from huggingface_hub import snapshot_download
+import requests
 
 def download_finetuned_model():
     model_dir = "./finetuned_laborlaw_model"
-    
-    if not os.path.exists(model_dir):
-        print("📥 正在從 Hugging Face 下載 BERT fine-tuned 模型...")
-        snapshot_download(
-            repo_id="DEBBY-YEH/finetuned-laborlaw-bert",
-            local_dir=model_dir,
-            local_dir_use_symlinks=False,
-            resume_download=True
-        )
-    else:
-        print("✅ 模型資料夾已存在，略過下載")
+    os.makedirs(model_dir, exist_ok=True)
 
-    # ✅ 檢查模型檔案是否存在
-    model_path = os.path.join(model_dir, "model.safetensors")
-    if not os.path.exists(model_path):
-        raise FileNotFoundError("❌ 無法找到 model.safetensors，請確認 Hugging Face 上傳完成且檔名正確！")
+    # ✅ Hugging Face 靜態下載連結
+    model_url = "https://huggingface.co/DEBBY-YEH/finetuned-laborlaw-bert/resolve/main/model.safetensors"
+    save_path = os.path.join(model_dir, "model.safetensors")
+
+    if os.path.exists(save_path):
+        print("✅ model.safetensors 已存在，略過下載")
+        return
+
+    print("📥 正在從 Hugging Face 下載 model.safetensors...")
+
+    # ⚠️ 下載模型檔
+    response = requests.get(model_url, stream=True)
+    if response.status_code == 200:
+        with open(save_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        print("✅ model.safetensors 下載完成")
     else:
-        print("✅ 成功找到 model.safetensors，模型準備完畢！")
+        raise RuntimeError(f"❌ 下載失敗，HTTP 狀態碼: {response.status_code}")
