@@ -1,26 +1,68 @@
- 🤖 AI Chatbot Project
-🚀 這是一個基於 Flask + FAISS + OpenAI API 的 AI 聊天機器人，可自動檢索資料並回答問題
+# 🤖 Taiwan Labor Law Chatbot Evaluation Report
 
-📌 功能特色
-- 🔍 基於 FAISS 向量數據庫的檢索
-- 🏗  與 OpenAI API 整合進行對話
-- 📊 儲存並檢索對話歷史
-- 🌐 可部署至 Render
+## 📄 Project Overview
+This project evaluates the performance of two chatbot backend implementations for Taiwan Labor Law question answering:
 
-📚 技術架構
-- 後端：Flask + SQLite + FAISS + OpenAI API
-- 前端：HTML + CSS + Bootstrap
-- 向量模型：`sentence-transformers/all-MiniLM-L6-V2`
-- 資料庫：SQLAlchemy（支援 PostgreSQL / SQLite）
+1. **GPT + FAISS baseline retrieval**
+2. **Fine-tuned BERT classifier + GPT hybrid**
 
-🔥未來擴展
-✅ 改進回應的準確度
-✅ 增加多語言支持
-✅ 支援 PDF / Word 文本處理
+Evaluation was conducted on a **50-question human-labeled test set**, and the accuracy of answers was manually annotated as:
+- `1` = Correct
+- `0` = Incorrect
 
-🚀 快速開始
-```bash
-git clone https://github.com/你的帳號/AI_Chatbot_Project.git
-cd AI_Chatbot_Project
-pip install -r requirements.txt
-python app.py
+---
+
+## 🎯 Accuracy Comparison
+
+| Model               | Accuracy  |
+|---------------------|-----------|
+| **BERT Fine-tuned** | **90%**   |
+| GPT + FAISS         | **18%**   |
+
+---
+
+## 🔍 Insight Analysis
+
+### 1. BERT Fine-tune Model
+- Achieved **90% accuracy**, showing strong domain adaptation.
+- Handles legal intent and category prediction with high consistency.
+- Ideal for intent classification and grounding future chatbot responses.
+
+### 2. GPT + FAISS Baseline
+- Only **18% accuracy**, struggling with:
+  - Ambiguous or implicit phrasing
+  - Legal terminology variations
+- Solely relying on semantic similarity is insufficient for legal use cases.
+
+---
+
+## 🔄 Suggested Architecture
+- ✅ **Adopt BERT classifier as core routing engine**
+- 🔄 Combine with GPT to generate fluent answers **after classification**
+- 🔢 Future improvement: explore **multi-task learning** (classification + generation)
+
+---
+
+## 📋 Evaluation Dataset Summary
+- **Number of questions:** 50
+- **Annotation format:** CSV with columns: `question`, `answer`, `category`, `timestamp`, `label`
+- **Label = 1** for correct, **0** for incorrect
+
+---
+
+## 📦 Repository
+- Source Code: [AI_Chatbot Repository](https://github.com/HUEI-JYUN-DEBBY-YEH/AI_Chatbot)
+- BERT Training Project: [BERT Fine-tune for Labor Law](https://github.com/HUEI-JYUN-DEBBY-YEH/bert-fine-tune-taiwan-labor-law)
+- Deployed Demo: [BERT Fine-tune Chatbot on Render](https://bert-fine-tune.onrender.com)
+
+---
+
+## 🚀 Conclusion
+> The fine-tuned BERT classifier significantly improves legal QA accuracy and is production-ready. GPT alone is insufficient for such high-precision applications. A hybrid approach is highly recommended for future iterations.
+
+---
+
+## 🌟 Author
+- [@HUEI-JYUN-DEBBY-YEH](https://github.com/HUEI-JYUN-DEBBY-YEH)
+- NLP Application Engineer in Training
+- Focus: LLM, vector search, Flask API, multimodal, chatbot deployment
