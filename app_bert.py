@@ -1,62 +1,34 @@
-# app_bert.py
-# ✅ 加入 BERT 分類器，根據 user_input 選擇類別對應 chunks 做 GPT 回答
 
-from flask import Flask, request, render_template, session, redirect, url_for, jsonify, Response
-from flask_sqlalchemy import SQLAlchemy
-import os, pickle, json, torch
-import numpy as np
+from flask import Flask, request, render_template, session, redirect, url_for, jsonify
+import os, json, torch
 import openai
 from dotenv import load_dotenv
-from datetime import datetime
-from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from sentence_transformers import SentenceTransformer
+from datetime import datetime
 
-# === 載入環境變數與 OpenAI Key ===
+# === 環境變數與 OpenAI Key ===
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# === 初始化 Flask ===
 app = Flask(__name__, template_folder='template')
-app.secret_key = 'asdfghjkl123456789'
+app.secret_key = 'secure_key'
 
-# === 使用者帳密（範例） ===
-users = {"David Chou": "A123456789"}
+# 使用者帳密（簡化測試用）
+users = {"Debby": "123456"}
 
-# === 資料庫設定 ===
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///test.db")
-app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
-db = SQLAlchemy(app)
-
-# === ChatHistory模型 ===
-class BERTChatHistory(db.Model):
-    __tablename__ = 'bert_chat_history'  # ✅ 使用不同表名
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_input = db.Column(db.Text)
-    bert_label = db.Column(db.String(50))
-    gpt_response = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-with app.app_context():
-    db.create_all()
-
-# === ✅ 載入 BERT fine-tuned 模型 ===
+# === 載入模型與分類資料 ===
 model_name = "DEBBY-YEH/finetuned-laborlaw-bert"
 bert_tokenizer = AutoTokenizer.from_pretrained(model_name)
 bert_model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
-# ✅ label 對應
 label2id = {
-  "假別": 0,
-  "其他": 1,
-  "契約與聘僱關係": 2,
-  "工時": 3,
-  "終止與解僱": 4,
-  "職場安全與性別平等": 5,
-  "薪資": 6
+  "假別": 0, "其他": 1, "契約與聘僱關係": 2,
+  "工時": 3, "終止與解僱": 4, "職場安全與性別平等": 5, "薪資": 6
 }
 id2label = {v: k for k, v in label2id.items()}
 
+<<<<<<< HEAD
 # === ✅ 載入 chunks（分類好的資料）===
 try:
     with open("classified_chunks_cleaned.json", "r", encoding="utf-8") as f:
@@ -64,8 +36,13 @@ try:
     print(f"✅ 已成功讀取分類檔，共有 {len(chunk_data)} 類分類。")
 except Exception as e:
     print(f"❌ 無法讀取 classified_chunks_cleaned.json：{e}")
+=======
+with open("classified_chunks_cleaned.json", "r", encoding="utf-8") as f:
+    chunk_data = json.load(f)
+>>>>>>> bert_classifier_integration
 
-# ✅ 分類函式
+embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
 def predict_category(text):
     inputs = bert_tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     with torch.no_grad():
@@ -73,10 +50,6 @@ def predict_category(text):
         predicted_id = torch.argmax(outputs.logits, dim=1).item()
         return id2label[predicted_id]
 
-# === ✅ 載入向量模型（可省略 GPT 調用）===
-embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-
-# === ✅ 首頁 ===
 @app.route("/")
 def home():
     if "username" not in session:
@@ -101,7 +74,6 @@ def mainpage():
         return redirect(url_for("verification"))
     return render_template("chatbot_mainpage.html")
 
-# === ✅ 問答主邏輯 ===
 @app.route("/api/chat", methods=["POST"])
 def chat():
     if "username" not in session:
@@ -114,18 +86,10 @@ def chat():
 
     try:
         predicted_label = predict_category(user_input)
-        chunks = chunk_data.get(predicted_label, [])[:3]  # 取前3筆分類內 chunk
-        
+        chunks = chunk_data.get(predicted_label, [])[:3]
+
         if not chunks:
-            answer = f"❌ 未找到分類 {predicted_label} 的資料。"
-            new_record = BERTChatHistory(
-                user_input=user_input,
-                bert_label=predicted_label,
-                gpt_response=answer
-            )
-            db.session.add(new_record)
-            db.session.commit()
-            return jsonify({"response": answer})
+            return jsonify({"response": f"❌ 未找到分類 {predicted_label} 的資料。"})
 
         print(f"📌 BERT 分類結果：{predicted_label}")
 
@@ -146,41 +110,11 @@ def chat():
         )
 
         answer = response.choices[0].message["content"]
-
-        new_record = BERTChatHistory(
-            user_input=user_input,
-            bert_label=predicted_label,
-            gpt_response=answer
-        )
-        db.session.add(new_record)
-        db.session.commit()
-
         return jsonify({"response": answer})
 
     except Exception as e:
-        print(f"❌ BERT-GPT 錯誤：{e}")
+        print(f"❌ 錯誤：{e}")
         return jsonify({"error": "伺服器錯誤，請稍後再試"}), 500
-
-# === ✅ 提供歷史 API（for JSON下載）===
-@app.route("/api/history", methods=["GET"])
-def get_history():
-    username = session.get("username", "Guest")
-    history = BERTChatHistory.query.order_by(BERTChatHistory.timestamp).all()
-    result = [
-        {
-            "question": h.user_input,
-            "category": h.bert_label,
-            "answer": h.gpt_response,
-            "timestamp": h.timestamp.isoformat()
-        }
-        for h in history
-    ]
-    return Response(json.dumps(result, ensure_ascii=False), mimetype='application/json')
-
-with app.app_context():
-    count = BERTChatHistory.query.count()
-    print(f"✅ PostgreSQL 已連線，紀錄數量：{count}")
-
 
 @app.route("/logout")
 def logout():
