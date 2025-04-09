@@ -58,8 +58,12 @@ label2id = {
 id2label = {v: k for k, v in label2id.items()}
 
 # === ✅ 載入 chunks（分類好的資料）===
-with open("classified_chunks_cleaned.json", "r", encoding="utf-8") as f:
-    chunk_data = json.load(f)
+try:
+    with open("classified_chunks_cleaned.json", "r", encoding="utf-8") as f:
+        chunk_data = json.load(f)
+    print(f"✅ 已成功讀取分類檔，共有 {len(chunk_data)} 類分類。")
+except Exception as e:
+    print(f"❌ 無法讀取 classified_chunks_cleaned.json：{e}")
 
 # ✅ 分類函式
 def predict_category(text):
