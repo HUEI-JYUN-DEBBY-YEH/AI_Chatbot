@@ -1,3 +1,5 @@
+This project integrates a fine-tuned BERT model to classify user inquiries related to Taiwan's Labor Standards Act. Upon classification, the system retrieves predefined responses from a local dictionary, effectively simulating a legal chatbot. The architecture encompasses user input processing, BERT-based classification, and response generation.​
+
 # 🤖 Taiwan Labor Law Chatbot Evaluation Report
 
 ## 📄 Project Overview
