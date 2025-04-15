@@ -68,3 +68,9 @@ Evaluation was conducted on a **50-question human-labeled test set**, and the ac
 - [@HUEI-JYUN-DEBBY-YEH](https://github.com/HUEI-JYUN-DEBBY-YEH)
 - NLP Application Engineer in Training
 - Focus: LLM, vector search, Flask API, multimodal, chatbot deployment
+
+---
+
+## 🔗 Related Links
+- 📝 [Medium article: Building a Labor Law Legal Chatbot with BERT](https://medium.com/@debby.yeh1994)
+- 📂 [Portfolio summary on Notion](https://mango-mapusaurus-5df.notion.site/Debby-Yeh-NLP-Application-Engineer-Portfolio-1ca5118474d2801caa58de564fb53e38?pvs=4)
