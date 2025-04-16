@@ -2,7 +2,7 @@ This project integrates a fine-tuned BERT model to classify user inquiries relat
 
 # 🤖 Taiwan Labor Law Chatbot Evaluation Report
 
-🔖** Why this project matters：**
+🔖 Why this project matters：
 This project demonstrates how LLMs can be grounded in real-world legal applications.
 By fine-tuning BERT on Taiwan’s Labor Law categories, it empowers users to access statutory information more efficiently, promoting legal literacy and fairness in the workplace.
 
