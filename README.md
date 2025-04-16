@@ -19,6 +19,12 @@ Evaluation was conducted on a **50-question human-labeled test set**, and the ac
 
 ---
 
+## 🧭 System Architecture
+
+![Architecture Diagram](./bert_faiss_chatbot.png)
+
+---
+
 ## 🎯 Accuracy Comparison
 
 | Model               | Accuracy  |
