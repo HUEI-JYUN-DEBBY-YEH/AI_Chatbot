@@ -1,99 +1,79 @@
-This project integrates a fine-tuned BERT model to classify user inquiries related to Taiwan's Labor Standards Act. Upon classification, the system retrieves predefined responses from a local dictionary, effectively simulating a legal chatbot. The architecture encompasses user input processing, BERT-based classification, and response generation.​
+## Taiwan Labor Law Chatbot (RAG vs Fine-tuned)
 
-# 🤖 Taiwan Labor Law Chatbot Evaluation Report
-This project implements a legal-domain chatbot using GPT-4, fine-tuned RoBERTa, and FAISS vector retrieval to compare two approaches to question-answering on Taiwan's Labor Standards Act.
+This project implements and evaluates two backend architectures for a chatbot designed to answer questions related to Taiwan's Labor Standards Act:
 
-## 🔖 Why this project matters：
+* A fine-tuned RoBERTa model for legal clause classification
+* A GPT-4 + FAISS-based retrieval-augmented generation (RAG) system
 
-This project demonstrates how LLMs can be grounded in real-world legal applications.
-By fine-tuning BERT on Taiwan’s Labor Law categories, it empowers users to access statutory information more efficiently, promoting legal literacy and fairness in the workplace. 
-Recruiters and employees often struggle to interpret legal clauses in real scenarios. This project showcases how LLMs can reduce barriers to legal knowledge through a low-resource chatbot demo.
-
-## 📄 Project Overview
-This project evaluates the performance of two chatbot backend implementations for Taiwan Labor Law question answering:
-
-1. **GPT + FAISS baseline retrieval**
-2. **Fine-tuned BERT classifier + GPT hybrid**
-
-Evaluation was conducted on a **50-question human-labeled test set**, and the accuracy of answers was manually annotated as:
-- `1` = Correct
-- `0` = Incorrect
+Both models are compared in terms of accuracy, response reliability, and production-readiness.
 
 ---
 
-## 🧭 System Architecture
+### 🔍 Why this project matters
 
+Many employees and recruiters struggle to interpret Taiwan's labor laws. This project demonstrates how large language models (LLMs) can reduce barriers to legal knowledge by combining classification and retrieval techniques to provide accurate, accessible answers.
+
+By fine-tuning BERT on categorized legal clauses and comparing it with RAG-style retrieval, this chatbot offers a low-resource solution for improving legal literacy and fairness in the workplace.
+
+---
+
+### 📄 System Overview
+
+* **User Input** → Inference pipeline
+* **Option 1:** RoBERTa classifier (5 legal categories) → Predefined response
+* **Option 2:** GPT-4 + FAISS vector search → Top-1 semantic match + GPT response
+* CLI-based demo provided for both architectures
 ![Architecture Diagram](./bert_faiss_chatbot.png)
-- Custom GPT-4 chatbot interface using OpenAI API
-- Fine-tuned RoBERTa for clause classification (5 categories)
-- FAISS-based retrieval with keyword-enhanced indexing
-- CLI demo for both classification and semantic search QA
-  
 ---
-## 🧪 Key Features
-- RAG vs fine-tuned model performance comparison
-- Confidence score output for legal clause classification
-- Semantic retrieval with keyword boost for edge cases
-- Easily extensible to other domains with minor adaptation
-  
----
-## 🎯 Accuracy Comparison
 
-| Model               | Accuracy  |
-|---------------------|-----------|
-| **BERT Fine-tuned** | **90%**   |
-| GPT + FAISS         | **18%**   |
+### 🧪 Model Comparison
+
+| Model               | Accuracy |
+| ------------------- | -------- |
+| Fine-tuned RoBERTa  | 90%      |
+| GPT-4 + FAISS (RAG) | 18%      |
+
+**Insights:**
+
+* Fine-tuned models show high consistency and precision for domain-specific classification tasks
+* RAG pipelines underperform in legal QA due to ambiguous phrasing and semantic similarity limitations
 
 ---
 
-## 🔍 Insight Analysis
+### 🔧 Key Features
 
-### 1. BERT Fine-tune Model
-- Achieved **90% accuracy**, showing strong domain adaptation.
-- Handles legal intent and category prediction with high consistency.
-- Ideal for intent classification and grounding future chatbot responses.
-
-### 2. GPT + FAISS Baseline
-- Only **18% accuracy**, struggling with:
-  - Ambiguous or implicit phrasing
-  - Legal terminology variations
-- Solely relying on semantic similarity is insufficient for legal use cases.
+* Binary evaluation (correct/incorrect) on 50 manually labeled test questions
+* Confidence score output for RoBERTa predictions
+* Keyword-boosted FAISS retrieval for edge-case handling
+* Modular architecture for easy extension to other legal domains
 
 ---
 
-## 🔄 Suggested Architecture
-- ✅ **Adopt BERT classifier as core routing engine**
-- 🔄 Combine with GPT to generate fluent answers **after classification**
-- 🔢 Future improvement: explore **multi-task learning** (classification + generation)
+### 🔄 Suggested Deployment Architecture
+
+* Use fine-tuned BERT (or RoBERTa) as the **routing classifier**
+* Use GPT (e.g. GPT-4) for **response generation** after classification
+* Explore multi-task learning (classification + generation) in future iterations
 
 ---
 
-## 📋 Evaluation Dataset Summary
-- **Number of questions:** 50
-- **Annotation format:** CSV with columns: `question`, `answer`, `category`, `timestamp`, `label`
-- **Label = 1** for correct, **0** for incorrect
+### 📦 Resources
+
+* [GitHub Repository](https://github.com/HUEI-JYUN-DEBBY-YEH/AI_Chatbot)
+* [BERT Fine-tune Project](https://github.com/HUEI-JYUN-DEBBY-YEH/bert-fine-tune-taiwan-labor-law)
+* [Medium Article](https://medium.com/@debbyyeh/building-a-labor-law-legal-chatbot-with-bert-xxx)
+* [Portfolio Summary on Notion](https://www.notion.so/Debby-Yeh-NLP-Application-Engineer-Portfolio-xxx)
 
 ---
 
-## 📦 Repository
-- Source Code: [AI_Chatbot Repository](https://github.com/HUEI-JYUN-DEBBY-YEH/AI_Chatbot)
-- BERT Training Project: [BERT Fine-tune for Labor Law](https://github.com/HUEI-JYUN-DEBBY-YEH/bert-fine-tune-taiwan-labor-law)
-- Deployed Demo: [BERT Fine-tune Chatbot on Render](https://bert-fine-tune.onrender.com)
+### 👤 Author
+
+**@HUEI-JYUN-DEBBY-YEH**
+NLP Application Engineer in Training
+Focus: LLMs, vector search, chatbot deployment, multimodal pipeline, Flask API
 
 ---
 
-## 🚀 Conclusion
-> The fine-tuned BERT classifier significantly improves legal QA accuracy and is production-ready. GPT alone is insufficient for such high-precision applications. A hybrid approach is highly recommended for future iterations.
+### ✅ Conclusion
 
----
-
-## 🌟 Author
-- [@HUEI-JYUN-DEBBY-YEH](https://github.com/HUEI-JYUN-DEBBY-YEH)
-- NLP Application Engineer in Training
-- Focus: LLM, vector search, Flask API, multimodal, chatbot deployment
-
----
-
-## 🔗 Related Links
-- 📝 [Medium article: Building a Labor Law Legal Chatbot with BERT](https://medium.com/@debby.yeh1994)
-- 📂 [Portfolio summary on Notion](https://mango-mapusaurus-5df.notion.site/Debby-Yeh-NLP-Application-Engineer-Portfolio-1ca5118474d2801caa58de564fb53e38?pvs=4)
+For high-precision domains like legal QA, fine-tuned classification models significantly outperform retrieval-based methods. A hybrid architecture—classification for routing, generation for fluency—is recommended for production scenarios where accuracy and clarity are paramount.
