@@ -1,11 +1,13 @@
 This project integrates a fine-tuned BERT model to classify user inquiries related to Taiwan's Labor Standards Act. Upon classification, the system retrieves predefined responses from a local dictionary, effectively simulating a legal chatbot. The architecture encompasses user input processing, BERT-based classification, and response generation.​
 
 # 🤖 Taiwan Labor Law Chatbot Evaluation Report
+This project implements a legal-domain chatbot using GPT-4, fine-tuned RoBERTa, and FAISS vector retrieval to compare two approaches to question-answering on Taiwan's Labor Standards Act.
 
 ## 🔖 Why this project matters：
 
 This project demonstrates how LLMs can be grounded in real-world legal applications.
-By fine-tuning BERT on Taiwan’s Labor Law categories, it empowers users to access statutory information more efficiently, promoting legal literacy and fairness in the workplace.
+By fine-tuning BERT on Taiwan’s Labor Law categories, it empowers users to access statutory information more efficiently, promoting legal literacy and fairness in the workplace. 
+Recruiters and employees often struggle to interpret legal clauses in real scenarios. This project showcases how LLMs can reduce barriers to legal knowledge through a low-resource chatbot demo.
 
 ## 📄 Project Overview
 This project evaluates the performance of two chatbot backend implementations for Taiwan Labor Law question answering:
@@ -22,9 +24,19 @@ Evaluation was conducted on a **50-question human-labeled test set**, and the ac
 ## 🧭 System Architecture
 
 ![Architecture Diagram](./bert_faiss_chatbot.png)
-
+- Custom GPT-4 chatbot interface using OpenAI API
+- Fine-tuned RoBERTa for clause classification (5 categories)
+- FAISS-based retrieval with keyword-enhanced indexing
+- CLI demo for both classification and semantic search QA
+  
 ---
-
+## 🧪 Key Features
+- RAG vs fine-tuned model performance comparison
+- Confidence score output for legal clause classification
+- Semantic retrieval with keyword boost for edge cases
+- Easily extensible to other domains with minor adaptation
+  
+---
 ## 🎯 Accuracy Comparison
 
 | Model               | Accuracy  |
