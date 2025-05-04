@@ -61,8 +61,8 @@ By fine-tuning BERT on categorized legal clauses and comparing it with RAG-style
 
 * [GitHub Repository](https://github.com/HUEI-JYUN-DEBBY-YEH/AI_Chatbot)
 * [BERT Fine-tune Project](https://github.com/HUEI-JYUN-DEBBY-YEH/bert-fine-tune-taiwan-labor-law)
-* [Medium Article](https://medium.com/@debbyyeh/building-a-labor-law-legal-chatbot-with-bert-xxx)
-* [Portfolio Summary on Notion](https://www.notion.so/Debby-Yeh-NLP-Application-Engineer-Portfolio-xxx)
+* [Medium Article](https://medium.com/@debby.yeh1994/%E6%89%93%E9%80%A0%E5%8F%B0%E7%81%A3%E5%8B%9E%E5%9F%BA%E6%B3%95-chatbot-%E5%BE%9E-bert-%E5%BE%AE%E8%AA%BF%E5%88%B0%E6%99%BA%E8%83%BD%E5%95%8F%E7%AD%94%E6%95%B4%E5%90%88-39180677eef1)
+* [Portfolio Summary on Notion](https://mango-mapusaurus-5df.notion.site/debby-yeh-portfolio?pvs=4)
 
 ---
 
