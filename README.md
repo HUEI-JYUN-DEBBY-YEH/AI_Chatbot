@@ -1,3 +1,5 @@
+This project was part of my journey toward building fair, human-centered AI for workplace transformation.
+
 ## Taiwan Labor Law Chatbot (RAG vs Fine-tuned)
 
 This project implements and evaluates two backend architectures for a chatbot designed to answer questions related to Taiwan's Labor Standards Act:
